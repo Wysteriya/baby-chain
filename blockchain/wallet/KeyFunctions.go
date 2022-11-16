@@ -5,7 +5,6 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 )
 
@@ -25,14 +24,7 @@ func SignMessage(priv *ecdsa.PrivateKey, hash []byte) ([]byte, error) {
 	return sign, err
 }
 
-func EncodePrivate(privKey *ecdsa.PrivateKey) (string, error) {
-	encoded, err := x509.MarshalECPrivateKey(privKey)
-	if err != nil {
-		return "", err
-	}
-	pemEncoded := pem.EncodeToMemory(&pem.Block{Bytes: encoded})
-	return string(pemEncoded), nil
-}
+
 
 func GeneratePublicAddressAndKey() (public_address string, private_key string) {
 	keys, err := GenerateKeys()
