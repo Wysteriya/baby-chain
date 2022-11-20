@@ -4,8 +4,8 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/x509"
 	"fmt"
+	"github.com/ubiq/go-ubiq/common/hexutil"
 )
 
 func GenerateKeys() (ecdsa.PrivateKey, error) {
@@ -24,17 +24,15 @@ func SignMessage(priv *ecdsa.PrivateKey, hash []byte) ([]byte, error) {
 	return sign, err
 }
 
-
-
 func GeneratePublicAddressAndKey() (public_address string, private_key string) {
 	keys, err := GenerateKeys()
 	if err != nil {
 		fmt.Println("error generating keys")
 	}
-	addr_x := fmt.Sprintf("%X", keys.PublicKey.X)
-	addr_y := fmt.Sprintf("%X", keys.PublicKey.Y)
+	addr_x := hexutil.EncodeBig(keys.PublicKey.X)
+	addr_y := hexutil.EncodeBig(keys.PublicKey.Y)
 	public_addr := addr_x + addr_y
-	priv_d := fmt.Sprintf("%X", keys.D)
+	priv_d := hexutil.EncodeBig(keys.D)
 	return public_addr, priv_d
 
 }
