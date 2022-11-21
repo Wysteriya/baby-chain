@@ -26,11 +26,15 @@ func (B *block) toBlock() Block {
     return Block{*B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
 }
 
+func (b *Block) to_block() block {
+    return block{&b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data}
+}
+
 func (b *Block) MarshalJSON() ([]byte, error) {
     if err := b.Validate(); err != nil {
         return []byte{}, err
     }
-    return json.Marshal(block{&b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data})
+    return json.Marshal(b.to_block())
 }
 
 func (b *Block) UnmarshalJSON(data []byte) error {
@@ -51,6 +55,10 @@ func (b *Block) Hash() Hash {
 
 func (b *Block) PrevHash() Hash {
     return b.prevHash
+}
+
+func (b *Block) Data() Data {
+    return Data(b.data)
 }
 
 func (b *Block) Validate() error {

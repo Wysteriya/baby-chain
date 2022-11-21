@@ -7,26 +7,33 @@ import (
 )
 
 import "blockchain/block"
+import "blockchain/consensus"
 
 type Blockchain struct {
     chain []block.Block
     fork string
+    cons consensus.CAlgo
 }
 
 type blockchain struct {
     Chain []block.Block `json:"chain"`
-    Fork *string `json:"fork"`
+    Fork string `json:"fork"`
+    Cons consensus.CAlgo `json:"cons"`
 }
 
 func (BC *blockchain) toBlockchain() Blockchain {
-    return Blockchain{BC.Chain, *BC.Fork}
+    return Blockchain{BC.Chain, BC.Fork, BC.Cons}
+}
+
+func (bc *Blockchain) to_blockchain() blockchain {
+    return blockchain{bc.chain, bc.fork, bc.cons}
 }
 
 func (bc *Blockchain) MarshalJSON() ([]byte, error) {
     if err := bc.Validate(); err != nil {
         return []byte{}, err
     }
-    return json.Marshal(blockchain{bc.chain, &bc.fork})
+    return json.Marshal(bc.to_blockchain())
 }
 
 func (bc *Blockchain) UnmarshalJSON(data []byte) error {
@@ -41,9 +48,15 @@ func (bc *Blockchain) UnmarshalJSON(data []byte) error {
     return nil
 }
 
-func (bc *Blockchain) MineBlock(header string, data block.Data) error {
-    b := block.MBlock(header, bc.HashOf(bc.Len() - 1), data)
-    if err := bc.ValidateBlock(b); err != nil {
+func (bc *Blockchain) MineBlock(header string, data block.Data) block.Block {
+    return block.MBlock(header, bc.HashOf(bc.Len() - 1), data)
+}
+
+func (bc *Blockchain) AddBlock(b block.Block) error {
+    i := bc.Len() - 1
+    if err := bc.ValidateBlock(b, i); err != nil {
+        return err
+    } else if err := bc.cons.Check(b); err != nil {
         return err
     }
     bc.chain = append(bc.chain, b)
@@ -63,17 +76,22 @@ func (bc *Blockchain) PrevHashOf(i int) block.Hash {
 }
 
 func (bc *Blockchain) Validate() error {
+    for i, b := range bc.chain[1:] {
+        if err := bc.ValidateBlock(b, i); err != nil {
+            return err
+        }
+    }
     return nil
 }
 
-func (bc *Blockchain) ValidateBlock(b block.Block) error {
+func (bc *Blockchain) ValidateBlock(b block.Block, i int) error {
     if err := b.Validate(); err != nil {
         return err
     }
-    if bc.HashOf(bc.Len() - 1) == b.PrevHash() {
-        return nil
+    if bc.HashOf(i) != b.PrevHash() {
+        return errors.New("chain hash mismatch")
     }
-    return errors.New("chain hash mismatch")
+    return nil
 }
 
 func (bc *Blockchain) Print() {
@@ -88,8 +106,8 @@ func (bc *Blockchain) Save() ([]byte, error) {
     return json.Marshal(bc)
 }
 
-func New(data block.Data) Blockchain {
-    return Blockchain{[]block.Block{block.Genesis(data)}, "AA1"}
+func New(data block.Data, cons consensus.CAlgo) Blockchain {
+    return Blockchain{[]block.Block{block.Genesis(data)}, "AA1", cons}
 }
 
 func Load(save []byte) (Blockchain, error) {
