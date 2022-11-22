@@ -1,11 +1,10 @@
 package blockchain
 
 import (
+	"blockchain/block"
 	"reflect"
 	"testing"
 )
-
-import "blockchain/block"
 
 func TestSaveLoad(t *testing.T) {
 	bc := New(block.Data{"balances": block.Data{"amith": "1000", "yash": "500"}, "key": "10", "test": true})

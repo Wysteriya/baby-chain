@@ -1,7 +1,6 @@
 package block
 
 import (
-	"blockchain/blockchain/Proof_of_work"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +12,6 @@ type Block struct {
 	prevHash  Hash
 	hash      Hash
 	data      Data
-	nonce     int64
 }
 
 type block struct {
@@ -22,18 +20,17 @@ type block struct {
 	PrevHash  *Hash   `json:"prev_hash"`
 	Hash      *Hash   `json:"hash"`
 	Data      *Data   `json:"data"`
-	Nonce     *int64  `json:"nonce"`
 }
 
 func (B *block) toBlock() Block {
-	return Block{*B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data, *B.Nonce}
+	return Block{*B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
 }
 
 func (b *Block) MarshalJSON() ([]byte, error) {
 	if err := b.Validate(); err != nil {
 		return []byte{}, err
 	}
-	return json.Marshal(block{&b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data, &b.nonce})
+	return json.Marshal(block{&b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data})
 }
 
 func (b *Block) UnmarshalJSON(data []byte) error {
@@ -60,9 +57,6 @@ func (b *Block) Data() *Data {
 	return &b.data
 }
 
-func (b *Block) Nonce() int64 {
-	return b.nonce
-}
 func (b *Block) Validate() error {
 	if b.Hash() != b.hash {
 		return errors.New("hash mismatch")
@@ -83,7 +77,7 @@ func (b *Block) Save() ([]byte, error) {
 }
 
 func New(header string, timestamp Time, prevHash Hash, data Data) Block {
-	b := Block{header, timestamp, prevHash, HashB(), data, 0}
+	b := Block{header, timestamp, prevHash, HashB(), data}
 	b.hash = b.Hash()
 	return b
 }
@@ -97,14 +91,8 @@ func Load(save []byte) (Block, error) {
 }
 
 func MBlock(header string, prevHash Hash, data Data) Block {
-	blk := New(header, CurrTime(), prevHash, data)
-	powService := Proof_of_work.NewPowService(&blk)
-	nonce, hash := powService.Run()
-	blk.nonce = nonce
-	blk.hash = HashB(hash)
-	return blk
+	return New(header, CurrTime(), prevHash, data)
 }
-
 func Genesis(data Data) Block {
 	return MBlock("Genesis", HashB(), data)
 }
