@@ -15,7 +15,7 @@ type Block struct {
 }
 
 type block struct {
-    Header *string `json:"header"`
+    Header string `json:"header"`
     Timestamp *Time `json:"timestamp"`
     PrevHash *Hash `json:"prev_hash"`
     Hash *Hash `json:"hash"`
@@ -23,11 +23,11 @@ type block struct {
 }
 
 func (B *block) toBlock() Block {
-    return Block{*B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
+    return Block{B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
 }
 
 func (b *Block) to_block() block {
-    return block{&b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data}
+    return block{b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data}
 }
 
 func (b *Block) MarshalJSON() ([]byte, error) {
@@ -50,7 +50,7 @@ func (b *Block) UnmarshalJSON(data []byte) error {
 }
 
 func (b *Block) Hash() Hash {
-    return HashB([]byte(b.header), []byte{byte(b.timestamp)}, []byte(b.prevHash.Hex()), []byte(b.data.String()))
+    return HashB([]byte(b.header), []byte{byte(b.timestamp)}, b.prevHash[:], []byte(b.data.String()))
 }
 
 func (b *Block) PrevHash() Hash {

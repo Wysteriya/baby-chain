@@ -1,25 +1,29 @@
 package consensus
 
 import "blockchain/block"
+import "blockchain/blockchain"
 
-type Consensus interface {
-    Validate(block.Block) error
-    Run(block.Data) error
+type Consensus struct {
+    validate func(block.Block) bool
+    run func(block.Data) error
 }
 
 type CAlgo []Consensus
 
-func (ca *CAlgo) Check(b block.Block) error {
+func (ca *CAlgo) Exec(bc *blockchain.Blockchain, b block.Block) error {
+    if err := bc.ValidateBlock(b, bc.Len() - 1); err != nil {
+        return err
+    }
     for _, con := range *ca {
-        if err := con.Validate(b); err != nil {
-            return err
-        } else if err := con.Run(b.Data()); err != nil {
-            return err
+        if con.validate(b) {
+            if err := con.run(b.Data()); err != nil {
+                return err
+            }
         }
     }
     return nil
 }
 
 func New() CAlgo {
-    return CAlgo{cGenesis}
+    return CAlgo{CGenesis, CNewNode}
 }

@@ -2,12 +2,12 @@ package consensus
 
 import "blockchain/block"
 
-type cNewNode string
+func validateNN(b block.Block) bool {
+    return true
+}
 
-func (c cNewNode) Run(block.Data) error {
+func runNN(data block.Data) error {
     return nil
 }
 
-func (c cNewNode) Validate(b block.Block) error {
-    return nil
-}
+var CNewNode Consensus = Consensus{validateNN, runNN}

@@ -7,26 +7,23 @@ import (
 )
 
 import "blockchain/block"
-import "blockchain/consensus"
 
 type Blockchain struct {
     chain []block.Block
     fork string
-    cons consensus.CAlgo
 }
 
 type blockchain struct {
     Chain []block.Block `json:"chain"`
     Fork string `json:"fork"`
-    Cons consensus.CAlgo `json:"cons"`
 }
 
 func (BC *blockchain) toBlockchain() Blockchain {
-    return Blockchain{BC.Chain, BC.Fork, BC.Cons}
+    return Blockchain{BC.Chain, BC.Fork}
 }
 
 func (bc *Blockchain) to_blockchain() blockchain {
-    return blockchain{bc.chain, bc.fork, bc.cons}
+    return blockchain{bc.chain, bc.fork}
 }
 
 func (bc *Blockchain) MarshalJSON() ([]byte, error) {
@@ -53,10 +50,7 @@ func (bc *Blockchain) MineBlock(header string, data block.Data) block.Block {
 }
 
 func (bc *Blockchain) AddBlock(b block.Block) error {
-    i := bc.Len() - 1
-    if err := bc.ValidateBlock(b, i); err != nil {
-        return err
-    } else if err := bc.cons.Check(b); err != nil {
+    if err := bc.ValidateBlock(b, bc.Len() - 1); err != nil {
         return err
     }
     bc.chain = append(bc.chain, b)
@@ -89,7 +83,7 @@ func (bc *Blockchain) ValidateBlock(b block.Block, i int) error {
         return err
     }
     if bc.HashOf(i) != b.PrevHash() {
-        return errors.New("chain hash mismatch")
+        return errors.New(fmt.Sprintf("chain hash mismatch : %v & %v", bc.HashOf(i), b.PrevHash()))
     }
     return nil
 }
@@ -106,8 +100,8 @@ func (bc *Blockchain) Save() ([]byte, error) {
     return json.Marshal(bc)
 }
 
-func New(data block.Data, cons consensus.CAlgo) Blockchain {
-    return Blockchain{[]block.Block{block.Genesis(data)}, "AA1", cons}
+func New(data block.Data) Blockchain {
+    return Blockchain{[]block.Block{block.Genesis(data)}, "AA1"}
 }
 
 func Load(save []byte) (Blockchain, error) {

@@ -2,12 +2,12 @@ package consensus
 
 import "blockchain/block"
 
-type cGenesis string
+func validateG(b block.Block) bool {
+    return true
+}
 
-func (c cGenesis) Run(block.Data) error {
+func runG(data block.Data) error {
     return nil
 }
 
-func (c cGenesis) Validate(b block.Block) error {
-    return nil
-}
+var CGenesis Consensus = Consensus{validateG, runG}

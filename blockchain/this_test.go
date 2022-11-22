@@ -8,5 +8,4 @@ import (
 // import "blockchain/block"
 
 func Test(t *testing.T) {
-
 }
