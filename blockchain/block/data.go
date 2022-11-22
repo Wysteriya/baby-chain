@@ -3,13 +3,19 @@ package block
 import (
     "fmt"
     "errors"
+    "sort"
 )
 
 type Data map[string]interface {}
 
 func (d *Data) String() string {
+    keys := make([]string, 0)
+    for k, _ := range *d {
+        keys = append(keys, k)
+    }
+    sort.Strings(keys)
     dat := ""
-    for _, value := range *d {dat += fmt.Sprint(value, "\n")}
+    for _, key := range keys {dat += fmt.Sprint(key, " : ", (*d)[key], "\n")}
     return dat
 }
 
