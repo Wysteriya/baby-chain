@@ -1,12 +1,13 @@
 package consensus
 
 import "blockchain/block"
+import "blockchain/blockchain"
 
-func validateNN(b block.Block) bool {
+func validateNN(bc *blockchain.Blockchain, b block.Block) bool {
     return true
 }
 
-func runNN(data block.Data) error {
+func runNN(bc *blockchain.Blockchain, b block.Block) error {
     return nil
 }
 

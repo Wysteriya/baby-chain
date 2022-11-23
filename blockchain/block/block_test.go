@@ -5,7 +5,7 @@ import (
     "reflect"
 )
 
-func TestSaveLoad(t *testing.T) {
+func Test(t *testing.T) {
     b := Genesis(Data{"balances": Data{"amith": "1000", "yash": "500"}, "key": "10", "test": true})
     if save, err := b.Save(); err != nil {
         t.Errorf("%s", err)
