@@ -2,35 +2,33 @@ package jsoner
 
 import (
 	"bufio"
-	"log"
 	"os"
 )
 
 func ReadData(filename string) ([]byte, error) {
-	file, err := os.Open(filename)
-
+    file, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 	defer file.Close()
 
-	stats, statsErr := file.Stat()
-	if statsErr != nil {
-		return nil, statsErr
+    stats, err := file.Stat()
+	if err != nil {
+		return []byte{}, err
 	}
 
-	var size int64 = stats.Size()
+	size := stats.Size()
 	bytes := make([]byte, size)
+	if _, err := bufio.NewReader(file).Read(bytes); err != nil {
+	    return []byte{}, err
+	}
 
-	buffer := bufio.NewReader(file)
-	_, err = buffer.Read(bytes)
-
-	return bytes, err
+	return bytes, nil
 }
 
-func WriteData(filename string, data []byte) {
-	err := os.WriteFile(filename, data, 0666)
-	if err != nil {
-		log.Fatal(err)
+func WriteData(filename string, data []byte) error {
+	if err := os.WriteFile(filename, data, 0666); err != nil {
+		return err
 	}
+	return nil
 }

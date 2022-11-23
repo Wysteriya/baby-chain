@@ -21,7 +21,7 @@ func Test(t *testing.T) {
         t.Fatalf("%s", err)
     } else if save, err := bc.Save(); err != nil {
         t.Fatalf("%s", err)
-    } else if err := jsoner.WriteData("test.bin", save); err != nil {
+    } else if err := jsoner.WriteData(testFile, save); err != nil {
         t.Fatalf("%s", err)
     } else if save, err := jsoner.ReadData(testFile); err != nil {
         t.Fatalf("%s", err)
