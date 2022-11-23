@@ -1,12 +1,13 @@
 package consensus
 
 import "blockchain/block"
+import "blockchain/blockchain"
 
-func validateG(b block.Block) bool {
+func validateG(bc *blockchain.Blockchain, b block.Block) bool {
     return true
 }
 
-func runG(data block.Data) error {
+func runG(bc *blockchain.Blockchain, b block.Block) error {
     return nil
 }
 

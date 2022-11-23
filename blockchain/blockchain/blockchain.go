@@ -90,8 +90,8 @@ func (bc *Blockchain) ValidateBlock(b block.Block, i int) error {
 
 func (bc *Blockchain) Print() {
     fmt.Println("---")
-    for _, block := range bc.chain {
-        block.Print()
+    for _, b := range bc.chain {
+        b.Print()
         fmt.Println("---")
     }
 }
