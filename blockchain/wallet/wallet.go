@@ -4,8 +4,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"encoding/hex"
 	"fmt"
-	"github.com/ubiq/go-ubiq/common/hexutil"
+	"math/big"
 )
 
 func VerifySignature(publicAddress string, hash []byte, sig []byte) bool {
@@ -20,16 +21,16 @@ func SignMessage(privateKeyString string, publicAddress string, hash []byte) ([]
 	return sign, err
 }
 
-func GeneratePublicAddressAndKey() (publicAddress string, privateKey string) {
+func GeneratePublicAddressAndKey() (string, string, error) {
 	keys, err := generateKeys()
 	if err != nil {
-		fmt.Println("error generating keys")
+		return "", "", err
 	}
-	addrX := hexutil.EncodeBig(keys.PublicKey.X)
-	addrY := hexutil.EncodeBig(keys.PublicKey.Y)
-	publicAddr := addrX + addrY
-	privyD := hexutil.EncodeBig(keys.D)
-	return publicAddr, privyD
+	addrX := keys.PublicKey.X.Bytes()
+	addrY := keys.PublicKey.Y.Bytes()
+	publicAddr := append(addrX, addrY...)
+	privyD := keys.D.Bytes()
+	return hex.EncodeToString(publicAddr), hex.EncodeToString(privyD), nil
 }
 
 func generateKeys() (ecdsa.PrivateKey, error) {
@@ -39,43 +40,59 @@ func generateKeys() (ecdsa.PrivateKey, error) {
 }
 
 func makePrivateKey(publicAddress string, privyD string) *ecdsa.PrivateKey {
-	pubX, err1 := hexutil.DecodeBig(publicAddress[:66])
+	pubX, err1 := hex.DecodeString(publicAddress[:64])
 	if err1 != nil {
 		fmt.Println(err1.Error())
 	}
-	pubY, err2 := hexutil.DecodeBig(publicAddress[66:])
+	pubY, err2 := hex.DecodeString(publicAddress[64:])
 	if err2 != nil {
 		fmt.Println(err2.Error())
 	}
-	privateD, err3 := hexutil.DecodeBig(privyD[:])
+	privateD, err3 := hex.DecodeString(privyD[:])
 	if err3 != nil {
 		fmt.Println(err3.Error())
 	}
-	keyCurve := elliptic.P256()
+	pubKeyX := new(big.Int)
+	pubKeyY := new(big.Int)
+	privateKeyD := new(big.Int)
+
+	pubKeyX.SetBytes(pubX)
+	pubKeyY.SetBytes(pubY)
+	privateKeyD.SetBytes(privateD)
+
 	pubKey := new(ecdsa.PublicKey)
+	keyCurve := elliptic.P256()
 	pubKey.Curve = keyCurve
-	pubKey.X = pubX
-	pubKey.Y = pubY
+	pubKey.X = pubKeyX
+	pubKey.Y = pubKeyY
+
 	privyKey := new(ecdsa.PrivateKey)
 	privyKey.PublicKey = *pubKey
-	privyKey.D = privateD
+	privyKey.D = privateKeyD
 
 	return privyKey
 }
 
 func makePublicKey(publicAddress string) *ecdsa.PublicKey {
-	pubX, err1 := hexutil.DecodeBig(publicAddress[:66])
+	pubX, err1 := hex.DecodeString(publicAddress[:64])
 	if err1 != nil {
 		fmt.Println(err1.Error())
 	}
-	pubY, err2 := hexutil.DecodeBig(publicAddress[66:])
+	pubY, err2 := hex.DecodeString(publicAddress[64:])
 	if err2 != nil {
 		fmt.Println(err2.Error())
 	}
-	keyCurve := elliptic.P256()
+	pubKeyX := new(big.Int)
+	pubKeyY := new(big.Int)
+
+	pubKeyX.SetBytes(pubX)
+	pubKeyY.SetBytes(pubY)
+
 	pubKey := new(ecdsa.PublicKey)
+	keyCurve := elliptic.P256()
 	pubKey.Curve = keyCurve
-	pubKey.X = pubX
-	pubKey.Y = pubY
+	pubKey.X = pubKeyX
+	pubKey.Y = pubKeyY
+
 	return pubKey
 }
