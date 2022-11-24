@@ -72,6 +72,9 @@ func (b *Block) Validate() error {
 	if err := b.data.Validate(); err != nil {
 		return err
 	}
+	if err := b.Header.Validate(); err != nil {
+		return err
+	}
 	return nil
 }
 

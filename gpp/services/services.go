@@ -1,19 +1,25 @@
 package services
 
 import (
-	"blockchain/block"
-	"blockchain/blockchain"
-	"blockchain/consensus"
-	"blockchain/wallet"
-	"db/jsoner"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 )
 
+import (
+	"blockchain/block"
+	"blockchain/blockchain"
+	"blockchain/consensus"
+	"blockchain/db/jsoner"
+	"blockchain/wallet"
+)
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
 func LoadBlockchain() blockchain.Blockchain {
-	bchData, err := jsoner.ReadData("../db/blockchain.bin")
+	bchData, err := jsoner.ReadData("../blockchain.bin")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -38,16 +44,20 @@ func NewNode(ctx *gin.Context) {
 	ipAddress := responseObj.IpAddress
 
 	returnObj := new(NewNodeResponse)
-	publicAddress, privateKey := wallet.GeneratePublicAddressAndKey()
-	returnObj.PublicAddress = publicAddress
+	publicKey, privateKey, err := wallet.GeneratePublicAddressAndKey()
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	returnObj.PublicKey = publicKey
 	returnObj.PrivateKey = privateKey
 
 	b := bc.MineBlock(
 		block.Data{"head": "NewNode"},
-		block.Data{"public_address": publicAddress, "ip_address": ipAddress},
+		block.Data{"public_key": publicKey, "ip_address": ipAddress},
 	)
 	hash := b.Hash()
-	signature, err := wallet.SignMessage(privateKey, publicAddress, hash[:])
+	signature, err := wallet.SignMessage(privateKey, publicKey, hash[:])
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
