@@ -10,7 +10,7 @@ type Data map[string]interface{}
 
 func (d *Data) String() string {
 	keys := make([]string, 0)
-	for k, _ := range *d {
+	for k := range *d {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -45,7 +45,7 @@ func (d *Data) Validate() error {
 		case []map[string]interface{}:
 			if value, ok := value.([]map[string]interface{}); ok {
 				for k, v := range value {
-					value[k] = Data(v)
+					value[k] = v
 				}
 				(*d)[key] = value
 			}

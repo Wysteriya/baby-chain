@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
+	chainName := "baby_chain"
 	server := gin.Default()
-	basepath := server.Group("/rideshare")
-	services.RegisterClientRoutes(basepath)
-	services.RegisterBlockchainRoutes(basepath)
+	basePath := server.Group("/" + chainName)
+	services.RegisterClientRoutes(basePath)
 	log.Fatalln(server.Run(":9090"))
 }

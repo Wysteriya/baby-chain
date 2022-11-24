@@ -7,7 +7,7 @@ import (
 )
 
 type Block struct {
-	header    string
+	Header    Data
 	timestamp Time
 	prevHash  Hash
 	hash      Hash
@@ -15,26 +15,26 @@ type Block struct {
 }
 
 type block struct {
-	Header    string `json:"header"`
-	Timestamp *Time  `json:"timestamp"`
-	PrevHash  *Hash  `json:"prev_hash"`
-	Hash      *Hash  `json:"hash"`
-	Data      *Data  `json:"data"`
+	Header    *Data `json:"header"`
+	Timestamp *Time `json:"timestamp"`
+	PrevHash  *Hash `json:"prev_hash"`
+	Hash      *Hash `json:"hash"`
+	Data      *Data `json:"data"`
 }
 
 func (B *block) toBlock() Block {
-	return Block{B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
+	return Block{*B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
 }
 
-func (b *Block) to_block() block {
-	return block{b.header, &b.timestamp, &b.prevHash, &b.hash, &b.data}
+func (b *Block) toblock() block {
+	return block{&b.Header, &b.timestamp, &b.prevHash, &b.hash, &b.data}
 }
 
 func (b *Block) MarshalJSON() ([]byte, error) {
 	if err := b.Validate(); err != nil {
 		return []byte{}, err
 	}
-	return json.Marshal(b.to_block())
+	return json.Marshal(b.toblock())
 }
 
 func (b *Block) UnmarshalJSON(data []byte) error {
@@ -50,7 +50,7 @@ func (b *Block) UnmarshalJSON(data []byte) error {
 }
 
 func (b *Block) Hash() Hash {
-	return HashB([]byte(b.header), []byte{byte(b.timestamp)}, b.prevHash[:], []byte(b.data.String()))
+	return b.hash
 }
 
 func (b *Block) PrevHash() Hash {
@@ -58,11 +58,15 @@ func (b *Block) PrevHash() Hash {
 }
 
 func (b *Block) Data() Data {
-	return Data(b.data)
+	return b.data
+}
+
+func (b *Block) genHash() Hash {
+	return HashB([]byte{byte(b.timestamp)}, b.prevHash[:], []byte(b.data.String()))
 }
 
 func (b *Block) Validate() error {
-	if b.Hash() != b.hash {
+	if b.genHash() != b.hash {
 		return errors.New("hash mismatch")
 	}
 	if err := b.data.Validate(); err != nil {
@@ -73,16 +77,16 @@ func (b *Block) Validate() error {
 
 func (b *Block) Print() {
 	fmt.Printf("Header: %s; Timestamp: %s; PrevHash: %s...; Hash: %s...;\nData: %s\n",
-		b.header, b.timestamp.String(), b.prevHash.Hex()[:16], b.hash.Hex()[:16], b.data)
+		b.Header, b.timestamp.String(), b.prevHash.Hex()[:16], b.hash.Hex()[:16], b.data)
 }
 
 func (b *Block) Save() ([]byte, error) {
 	return json.Marshal(b)
 }
 
-func New(header string, timestamp Time, prevHash Hash, data Data) Block {
+func New(header Data, timestamp Time, prevHash Hash, data Data) Block {
 	b := Block{header, timestamp, prevHash, HashB(), data}
-	b.hash = b.Hash()
+	b.hash = b.genHash()
 	return b
 }
 
@@ -94,10 +98,10 @@ func Load(save []byte) (Block, error) {
 	return b, nil
 }
 
-func MBlock(header string, prevHash Hash, data Data) Block {
+func MBlock(header Data, prevHash Hash, data Data) Block {
 	return New(header, CurrTime(), prevHash, data)
 }
 
 func Genesis(data Data) Block {
-	return MBlock("Genesis", HashB(), data)
+	return MBlock(Data{"head": "Genesis"}, HashB(), data)
 }

@@ -6,13 +6,16 @@ import (
 )
 
 func ReadData(filename string) ([]byte, error) {
-    file, err := os.Open(filename)
+	file, err := os.Open(filename)
 	if err != nil {
 		return []byte{}, err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+		}
+	}(file)
 
-    stats, err := file.Stat()
+	stats, err := file.Stat()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -20,7 +23,7 @@ func ReadData(filename string) ([]byte, error) {
 	size := stats.Size()
 	bytes := make([]byte, size)
 	if _, err := bufio.NewReader(file).Read(bytes); err != nil {
-	    return []byte{}, err
+		return []byte{}, err
 	}
 
 	return bytes, nil

@@ -28,54 +28,54 @@ func GeneratePublicAddressAndKey() (publicAddress string, privateKey string) {
 	addrX := hexutil.EncodeBig(keys.PublicKey.X)
 	addrY := hexutil.EncodeBig(keys.PublicKey.Y)
 	publicAddr := addrX + addrY
-	privy_d := hexutil.EncodeBig(keys.D)
-	return publicAddr, privy_d
+	privyD := hexutil.EncodeBig(keys.D)
+	return publicAddr, privyD
 }
 
 func generateKeys() (ecdsa.PrivateKey, error) {
-	pubkeyCurve := elliptic.P256()
-	privateKey, err := ecdsa.GenerateKey(pubkeyCurve, rand.Reader)
+	publicKeyCurve := elliptic.P256()
+	privateKey, err := ecdsa.GenerateKey(publicKeyCurve, rand.Reader)
 	return *privateKey, err
 }
 
-func makePrivateKey(public_address string, priv_d string) *ecdsa.PrivateKey {
-	pub_x, err1 := hexutil.DecodeBig(public_address[:66])
+func makePrivateKey(publicAddress string, privyD string) *ecdsa.PrivateKey {
+	pubX, err1 := hexutil.DecodeBig(publicAddress[:66])
 	if err1 != nil {
 		fmt.Println(err1.Error())
 	}
-	pub_y, err2 := hexutil.DecodeBig(public_address[66:])
+	pubY, err2 := hexutil.DecodeBig(publicAddress[66:])
 	if err2 != nil {
 		fmt.Println(err2.Error())
 	}
-	private_d, err3 := hexutil.DecodeBig(priv_d[:])
+	privateD, err3 := hexutil.DecodeBig(privyD[:])
 	if err3 != nil {
 		fmt.Println(err3.Error())
 	}
-	key_curve := elliptic.P256()
-	pub_key := new(ecdsa.PublicKey)
-	pub_key.Curve = key_curve
-	pub_key.X = pub_x
-	pub_key.Y = pub_y
-	priv_key := new(ecdsa.PrivateKey)
-	priv_key.PublicKey = *pub_key
-	priv_key.D = private_d
+	keyCurve := elliptic.P256()
+	pubKey := new(ecdsa.PublicKey)
+	pubKey.Curve = keyCurve
+	pubKey.X = pubX
+	pubKey.Y = pubY
+	privyKey := new(ecdsa.PrivateKey)
+	privyKey.PublicKey = *pubKey
+	privyKey.D = privateD
 
-	return priv_key
+	return privyKey
 }
 
 func makePublicKey(publicAddress string) *ecdsa.PublicKey {
-	pub_x, err1 := hexutil.DecodeBig(publicAddress[:66])
+	pubX, err1 := hexutil.DecodeBig(publicAddress[:66])
 	if err1 != nil {
 		fmt.Println(err1.Error())
 	}
-	pub_y, err2 := hexutil.DecodeBig(publicAddress[66:])
+	pubY, err2 := hexutil.DecodeBig(publicAddress[66:])
 	if err2 != nil {
 		fmt.Println(err2.Error())
 	}
-	key_curve := elliptic.P256()
-	pub_key := new(ecdsa.PublicKey)
-	pub_key.Curve = key_curve
-	pub_key.X = pub_x
-	pub_key.Y = pub_y
-	return pub_key
+	keyCurve := elliptic.P256()
+	pubKey := new(ecdsa.PublicKey)
+	pubKey.Curve = keyCurve
+	pubKey.X = pubX
+	pubKey.Y = pubY
+	return pubKey
 }
