@@ -9,14 +9,14 @@ import (
 	"math/big"
 )
 
-func VerifySignature(publicAddress string, hash []byte, sig []byte) bool {
-	publicKey := makePublicKey(publicAddress)
+func VerifySignature(publicKey_ string, hash []byte, sig []byte) bool {
+	publicKey := makePublicKey(publicKey_)
 	isValid := ecdsa.VerifyASN1(publicKey, hash, sig)
 	return isValid
 }
 
-func SignMessage(privateKeyString string, publicAddress string, hash []byte) ([]byte, error) {
-	privateKey := makePrivateKey(publicAddress, privateKeyString)
+func SignMessage(privateKey_ string, publicKey string, hash []byte) ([]byte, error) {
+	privateKey := makePrivateKey(publicKey, privateKey_)
 	sign, err := ecdsa.SignASN1(rand.Reader, privateKey, hash)
 	return sign, err
 }

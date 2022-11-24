@@ -50,7 +50,7 @@ func (d *Data) Validate() error {
 				(*d)[key] = value
 			}
 		default:
-			return errors.New(fmt.Sprint(vt, " can't be treated as json object"))
+			return errors.New(fmt.Sprint(vt, " can't be treated as Data object"))
 		}
 	}
 	return nil
