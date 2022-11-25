@@ -45,6 +45,10 @@ func (bc *Blockchain) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (bc *Blockchain) BlockAt(i int) block.Block {
+	return bc.chain[i]
+}
+
 func (bc *Blockchain) MineBlock(header block.Data, data block.Data) block.Block {
 	return block.MBlock(header, bc.HashOf(bc.Len()-1), data)
 }
