@@ -1,7 +1,6 @@
 package services
 
 type NewNodePost struct {
-	UserType  string `json:"user_type"`
 	IpAddress string `json:"ip_address"`
 }
 type NewNodeResponse struct {

@@ -56,12 +56,15 @@ func NewNode(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	ctx.IndentedJSON(http.StatusOK, returnObj)
-
 	if err := chain.Sync(&bc, &sd); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+	if err := chain.SaveBlockchain(&bc); err != nil {
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusOK, returnObj)
 }
 
 func sync(ctx *gin.Context) {
@@ -92,6 +95,7 @@ func sync(ctx *gin.Context) {
 		}
 	}
 }
+
 func RegisterClientRoutes(rg *gin.RouterGroup) {
 	clientRoute := rg.Group("/service")
 	clientRoute.POST("/newnode", NewNode)
