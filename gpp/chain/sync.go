@@ -7,7 +7,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -33,13 +34,17 @@ func SendBC(ip string, data []byte) error {
 	})
 	responseBody := bytes.NewBuffer(postBody)
 	url := "http://" + ip + ":9090" + "/baby_chain/service/sync"
-	fmt.Println(url)
 	resp, err := http.Post(url, "application/json", responseBody)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprint("http status error : ", resp.StatusCode))
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		sb := string(body)
+		return errors.New(sb)
 	}
 	return nil
 }
