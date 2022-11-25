@@ -20,6 +20,8 @@ func main() {
 	}
 
 	sd := states.StateData{}
+	stts := states.New()
+	stts.Init(&sd)
 	if save, err := sd.Save(); err != nil {
 		fmt.Printf("%s", err)
 	} else if err := jsoner.WriteData(sdFile, save); err != nil {

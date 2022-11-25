@@ -1,17 +1,12 @@
 package services
 
 import (
-	"blockchain/states"
-	"fmt"
+	"gpp/chain"
 	"net/http"
-	"os"
 )
 
 import (
 	"blockchain/block"
-	"blockchain/blockchain"
-	"blockchain/consensus"
-	"blockchain/db/jsoner"
 	"blockchain/wallet"
 )
 
@@ -19,38 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func LoadBlockchain() blockchain.Blockchain {
-	bchData, err := jsoner.ReadData("../blockchain/db/blockchain.bin")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	bc, err := blockchain.Load(bchData)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return bc
-}
-
-func LoadStateData() states.StateData {
-	sdData, err := jsoner.ReadData("../blockchain/db/statedata.bin")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	sd, err := states.Load(sdData)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return sd
-}
-
-var bc = LoadBlockchain()
-var sd = LoadStateData()
-var cons = consensus.New()
-var stts = states.New()
+var bc = chain.LoadBlockchain()
+var sd = chain.LoadStateData()
+var cons = chain.LoadConsensus()
+var stts = chain.LoadStates()
 
 func NewNode(ctx *gin.Context) {
 	responseObj := new(NewNodePost)
@@ -89,6 +56,8 @@ func NewNode(ctx *gin.Context) {
 		return
 	}
 	ctx.IndentedJSON(http.StatusOK, returnObj)
+
+	chain.Sync(&bc, &sd)
 }
 
 func RegisterClientRoutes(rg *gin.RouterGroup) {
