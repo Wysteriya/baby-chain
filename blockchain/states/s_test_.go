@@ -13,7 +13,8 @@ func validateT_(_ *StateData, b block.Block) bool {
 }
 
 func runT_(sd *StateData, b block.Block) error {
-	*sd = StateData(b.Data())
+	data := b.Data()
+	(*sd)["test"] = data
 	return nil
 }
 
