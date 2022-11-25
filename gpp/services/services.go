@@ -1,6 +1,7 @@
 package services
 
 import (
+	"blockchain/blockchain"
 	"gpp/chain"
 	"net/http"
 )
@@ -57,10 +58,28 @@ func NewNode(ctx *gin.Context) {
 	}
 	ctx.IndentedJSON(http.StatusOK, returnObj)
 
-	chain.Sync(&bc, &sd)
+	if err := chain.Sync(&bc, &sd); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 }
 
+func sync(ctx *gin.Context) {
+	responseObj := new(SyncPost)
+	if err := ctx.BindJSON(responseObj); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	blockchainData := responseObj.BlockchainData
+	bc, err := blockchain.Load([]byte(blockchainData))
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	bc.Print()
+}
 func RegisterClientRoutes(rg *gin.RouterGroup) {
 	clientRoute := rg.Group("/service")
 	clientRoute.POST("/newnode", NewNode)
+	clientRoute.POST("/sync", sync)
 }
