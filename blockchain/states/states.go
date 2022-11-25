@@ -41,5 +41,5 @@ func (st *States) Exec(sd *StateData, b block.Block) error {
 }
 
 func New(sts ...State) States {
-	return append(States{SNode}, sts...)
+	return append(States{SNode, SGenesis}, sts...)
 }
