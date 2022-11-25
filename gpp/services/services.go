@@ -1,13 +1,13 @@
 package services
 
 import (
+	"blockchain/blockchain"
 	"gpp/chain"
 	"net/http"
 )
 
 import (
 	"blockchain/block"
-	"blockchain/blockchain"
 	"blockchain/wallet"
 )
 
@@ -59,9 +59,7 @@ func NewNode(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, returnObj)
 
 	if err := chain.Sync(&bc, &sd); err != nil {
-		return
-	}
-	if err := chain.SaveBlockchain(&bc); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 }
@@ -73,14 +71,27 @@ func sync(ctx *gin.Context) {
 		return
 	}
 	blockchainData := responseObj.BlockchainData
-	bc, err := blockchain.Load([]byte(blockchainData))
+	bch, err := blockchain.Load([]byte(blockchainData))
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	bc.Print()
+	if bc.Len() < bch.Len() {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": "short length of blockchain"})
+		return
+	}
+	diffLen := bch.Len() - bc.Len()
+	if bch.HashOf(bch.Len()-diffLen) != bc.HashOf(bc.Len()) {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": "hash mismatch"})
+		return
+	}
+	for i := diffLen; i > 0; i-- {
+		if err := bc.AddBlock(bch.BlockAt(bch.Len() - i)); err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+	}
 }
-
 func RegisterClientRoutes(rg *gin.RouterGroup) {
 	clientRoute := rg.Group("/service")
 	clientRoute.POST("/newnode", NewNode)
