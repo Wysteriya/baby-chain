@@ -16,15 +16,26 @@ func Load(save []byte) (StateData, error) {
 	if err := json.Unmarshal(save, &sd); err != nil {
 		return StateData{}, err
 	}
-	return sd, nil
+	d := block.Data(sd)
+	if err := d.Validate(); err != nil {
+		return nil, err
+	}
+	return StateData(d), nil
 }
 
 type State struct {
-	validate func(*StateData, block.Block) bool
-	run      func(*StateData, block.Block) error
+	initialize func(data *StateData)
+	validate   func(*StateData, block.Block) bool
+	run        func(*StateData, block.Block) error
 }
 
 type States []State
+
+func (st *States) Init(sd *StateData) {
+	for _, state := range *st {
+		state.initialize(sd)
+	}
+}
 
 func (st *States) Exec(sd *StateData, b block.Block) error {
 	if err := b.Validate(); err != nil {
@@ -41,5 +52,5 @@ func (st *States) Exec(sd *StateData, b block.Block) error {
 }
 
 func New(sts ...State) States {
-	return append(States{SNode}, sts...)
+	return append(States{SNode, SGenesis}, sts...)
 }

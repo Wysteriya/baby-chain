@@ -4,6 +4,10 @@ import (
 	"blockchain/block"
 )
 
+func initializeT_(sd *StateData) {
+	(*sd)["test"] = block.Data{}
+}
+
 func validateT_(_ *StateData, b block.Block) bool {
 	header := b.Header
 	if header["head"] != "Test" {
@@ -13,8 +17,12 @@ func validateT_(_ *StateData, b block.Block) bool {
 }
 
 func runT_(sd *StateData, b block.Block) error {
-	*sd = StateData(b.Data())
+	data := b.Data()
+	test, _ := (*sd)["test"].(block.Data)
+	for key, val := range data {
+		test[key] = val
+	}
 	return nil
 }
 
-var STest = State{validateT_, runT_}
+var STest = State{initializeT_, validateT_, runT_}
