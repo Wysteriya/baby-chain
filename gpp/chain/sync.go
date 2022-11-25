@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -31,13 +32,14 @@ func SendBC(ip string, data []byte) error {
 		"blockchain_data": dataString,
 	})
 	responseBody := bytes.NewBuffer(postBody)
-	url := ip + ":9090" + "/baby_chain/service/sync"
+	url := "http://" + ip + ":9090" + "/baby_chain/service/sync"
+	fmt.Println(url)
 	resp, err := http.Post(url, "application/json", responseBody)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("http status error : " + string(rune(resp.StatusCode)))
+		return errors.New(fmt.Sprint("http status error : ", resp.StatusCode))
 	}
 	return nil
 }
