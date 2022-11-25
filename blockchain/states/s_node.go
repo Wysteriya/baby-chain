@@ -4,6 +4,10 @@ import (
 	"blockchain/block"
 )
 
+func initializeNN(sd *StateData) {
+	(*sd)["full_nodes"] = block.Data{}
+}
+
 func validateNN(_ *StateData, b block.Block) bool {
 	header := b.Header
 	if header["head"] != "NewNode" {
@@ -26,8 +30,8 @@ func runNN(sd *StateData, b block.Block) error {
 	data := b.Data()
 	publicKey, _ := data["public_key"].(string)
 	ipAddress, _ := data["ip_address"].(string)
-	(*sd)["nodes"] = block.Data{publicKey: ipAddress}
+	(*sd)["full_nodes"] = block.Data{publicKey: ipAddress}
 	return nil
 }
 
-var SNode = State{validateNN, runNN}
+var SNode = State{initializeNN, validateNN, runNN}
