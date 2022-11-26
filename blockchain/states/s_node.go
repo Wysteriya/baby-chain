@@ -30,7 +30,8 @@ func runNN(sd *StateData, b block.Block) error {
 	data := b.Data()
 	publicKey, _ := data["public_key"].(string)
 	ipAddress, _ := data["ip_address"].(string)
-	(*sd)["full_nodes"] = block.Data{publicKey: ipAddress}
+	nodes := (*sd)["full_nodes"].(block.Data)
+	nodes[publicKey] = ipAddress
 	return nil
 }
 
