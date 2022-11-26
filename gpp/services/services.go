@@ -60,6 +60,7 @@ func NewNode(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+	bc.Print()
 	if err := chain.SaveBlockchain(&bc); err != nil {
 		return
 	}
@@ -67,7 +68,7 @@ func NewNode(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, returnObj)
 }
 
-func sync(ctx *gin.Context) {
+func Sync(ctx *gin.Context) {
 	responseObj := new(SyncPost)
 	if err := ctx.BindJSON(responseObj); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
@@ -79,12 +80,12 @@ func sync(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if bc.Len() < bch.Len() {
+	if bc.Len() > bch.Len() {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": "short length of blockchain"})
 		return
 	}
 	diffLen := bch.Len() - bc.Len()
-	if bch.HashOf(bch.Len()-diffLen) != bc.HashOf(bc.Len()) {
+	if bch.HashOf(bch.Len()-diffLen-1) != bc.HashOf(bc.Len()-1) {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": "hash mismatch"})
 		return
 	}
@@ -94,10 +95,14 @@ func sync(ctx *gin.Context) {
 			return
 		}
 	}
+	if err := chain.SaveBlockchain(&bc); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 }
 
 func RegisterClientRoutes(rg *gin.RouterGroup) {
 	clientRoute := rg.Group("/service")
 	clientRoute.POST("/newnode", NewNode)
-	clientRoute.POST("/sync", sync)
+	clientRoute.POST("/Sync", Sync)
 }
