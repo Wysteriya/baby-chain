@@ -2,7 +2,11 @@ package services
 
 import (
 	"blockchain/blockchain"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"gpp/chain"
+	"io"
 	"net/http"
 )
 
@@ -56,16 +60,17 @@ func NewNode(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if err := chain.Sync(&bc, &sd); err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-	bc.Print()
+
 	if err := chain.SaveBlockchain(&bc); err != nil {
 		return
 	}
-
 	ctx.IndentedJSON(http.StatusOK, returnObj)
+
+	go func() {
+		if err := chain.Sync(&bc, &sd); err != nil {
+			fmt.Println(err)
+		}
+	}()
 }
 
 func Sync(ctx *gin.Context) {
@@ -101,8 +106,42 @@ func Sync(ctx *gin.Context) {
 	}
 }
 
+func PublicInfo(ctx *gin.Context) {
+	responseObj := new(PublicInfoPost)
+	if err := ctx.BindJSON(responseObj); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	postBody, _ := json.Marshal(map[string]string{
+		"ip_address": responseObj.IpAddress,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	url := "http://localhost:9090" + "/baby_chain/service/newnode"
+	resp, err := http.Post(url, "application/json", responseBody)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	if resp.StatusCode != http.StatusOK {
+		ctx.IndentedJSON(resp.StatusCode, gin.H{"message": resp})
+		return
+	}
+	var NNRes NewNodeResponse
+	if err := json.Unmarshal(body, &NNRes); err != nil {
+		ctx.IndentedJSON(resp.StatusCode, gin.H{"message": resp})
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, NNRes)
+}
+
 func RegisterClientRoutes(rg *gin.RouterGroup) {
 	clientRoute := rg.Group("/service")
 	clientRoute.POST("/newnode", NewNode)
-	clientRoute.POST("/Sync", Sync)
+	clientRoute.POST("/sync", Sync)
+	clientRoute.POST("/publicinfo", PublicInfo)
 }

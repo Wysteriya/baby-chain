@@ -19,3 +19,16 @@ type AnnounceTravelPost struct {
 type SyncPost struct {
 	BlockchainData string `json:"blockchain_data"`
 }
+
+type PublicInfoPost struct {
+	IpAddress  string `json:"ip_address"`
+	Name       string `json:"name"`
+	Driver     bool   `json:"driver"`
+	Lisense    string `json:"lisense"`
+	Email      string `json:"email"`
+	Occupation string `json:"occupation"`
+	Hobbies    string `json:"hobbies"`
+	Skills     string `json:"skills"`
+	Interests  string `json:"interests"`
+	Others     string `json:"others"`
+}
