@@ -24,7 +24,7 @@ func Load(save []byte) (StateData, error) {
 }
 
 type State struct {
-	initialize func(data *StateData)
+	initialize func(*StateData)
 	validate   func(*StateData, block.Block) bool
 	run        func(*StateData, block.Block) error
 }
