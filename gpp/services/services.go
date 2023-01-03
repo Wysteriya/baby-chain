@@ -42,7 +42,7 @@ func NewNode(ctx *gin.Context) {
 		block.Data{"public_key": publicKey, "ip_address": ipAddress},
 	)
 	hash := b.Hash()
-	signature, err := wallet.SignMessage(privateKey, publicKey, hash[:])
+	signature := wallet.SignMessage(privateKey, hash[:])
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
