@@ -1,29 +1,39 @@
 package wallet
 
 import (
+	"baby-chain/tools"
 	"crypto/ed25519"
 	"encoding/hex"
-	"fmt"
 )
 
-func GeneratePublicAddressAndKey() (string, string, error) {
+func GenerateKeys() (string, string, error) {
 	publicKey, privateKey, err := generateKeys()
 	if err != nil {
 		return "", "", err
 	}
+	if len(publicKey) != 32 { // unstable publicKey
+		return GenerateKeys() // regenerate keys
+	}
+	if len(privateKey) != 64 { // unstable privateKey
+		return GenerateKeys() // regenerate keys
+	}
 	return hex.EncodeToString(publicKey), hex.EncodeToString(privateKey), nil
 }
 
-func SignMessage(privateKey_ string, hash []byte) []byte {
-	privateKey := makePrivateKey(privateKey_)
-	sign := ed25519.Sign(privateKey, hash)
-	return sign
+func SignHash(_privateKey string, hash tools.Hash) ([]byte, error) {
+	privateKey, err := makePrivateKey(_privateKey)
+	if err != nil {
+		return nil, err
+	}
+	return ed25519.Sign(privateKey, hash[:]), nil
 }
 
-func VerifySignature(publicKey_ string, hash []byte, sig []byte) bool {
-	publicKey := makePublicKey(publicKey_)
-	isValid := ed25519.Verify(publicKey, hash, sig)
-	return isValid
+func VerifySignature(_publicKey string, hash tools.Hash, sign []byte) bool {
+	publicKey, err := makePublicKey(_publicKey)
+	if err != nil {
+		return false
+	}
+	return ed25519.Verify(publicKey, hash[:], sign)
 }
 
 func generateKeys() (publicKey ed25519.PublicKey, privateKey ed25519.PrivateKey, err error) {
@@ -34,18 +44,18 @@ func generateKeys() (publicKey ed25519.PublicKey, privateKey ed25519.PrivateKey,
 	return publicKey, privateKey, nil
 }
 
-func makePrivateKey(_privateKey string) ed25519.PrivateKey {
-	privateKey, err1 := hex.DecodeString(_privateKey)
-	if err1 != nil {
-		fmt.Println(err1.Error())
+func makePrivateKey(_privateKey string) (ed25519.PrivateKey, error) {
+	privateKey, err := hex.DecodeString(_privateKey)
+	if err != nil {
+		return nil, err
 	}
-	return privateKey
+	return privateKey, nil
 }
 
-func makePublicKey(publicAddress string) ed25519.PublicKey {
-	publicKey, err1 := hex.DecodeString(publicAddress)
-	if err1 != nil {
-		fmt.Println(err1.Error())
+func makePublicKey(_publicKey string) (ed25519.PublicKey, error) {
+	publicKey, err := hex.DecodeString(_publicKey)
+	if err != nil {
+		return nil, err
 	}
-	return publicKey
+	return publicKey, nil
 }

@@ -1,7 +1,9 @@
 package block
 
 import (
+	"baby-chain/blockchain/wallet"
 	"baby-chain/tools"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 )
@@ -81,9 +83,17 @@ func MNew(header tools.Data, prevHash tools.Hash, data tools.Data) Block {
 }
 
 func MBlock(head string, prevHash tools.Hash, data tools.Data) Block {
-	return New(tools.Data{"head": head}, tools.CurrTime(), prevHash, data)
+	return MNew(tools.Data{"head": head}, prevHash, data)
 }
 
 func MGenesis(data tools.Data) Block {
 	return MBlock("Genesis", tools.HashB(), data)
+}
+
+func MNode(_publicKey string, _privateKey string, prevHash tools.Hash, data tools.Data) Block {
+	data["publicKey"] = _publicKey
+	b := MBlock("Node", prevHash, data)
+	sign, _ := wallet.SignHash(_privateKey, b.Hash)
+	b.Header["signature1"] = hex.EncodeToString(sign)
+	return b
 }

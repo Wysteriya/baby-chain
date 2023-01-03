@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+// todo: batched read write
+
 func ReadData(filename string) []byte {
 	file, err := os.Open(filename)
 	if err != nil {
