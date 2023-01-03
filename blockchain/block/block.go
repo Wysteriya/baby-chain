@@ -1,110 +1,89 @@
 package block
 
 import (
+	"baby-chain/tools"
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
 type Block struct {
-	Header    Data
-	timestamp Time
-	prevHash  Hash
-	hash      Hash
-	data      Data
-}
-
-type block struct {
-	Header    *Data `json:"header"`
-	Timestamp *Time `json:"timestamp"`
-	PrevHash  *Hash `json:"prev_hash"`
-	Hash      *Hash `json:"hash"`
-	Data      *Data `json:"data"`
-}
-
-func (B *block) toBlock() Block {
-	return Block{*B.Header, *B.Timestamp, *B.PrevHash, *B.Hash, *B.Data}
-}
-
-func (b *Block) toblock() block {
-	return block{&b.Header, &b.timestamp, &b.prevHash, &b.hash, &b.data}
+	Header    tools.Data `json:"header"`
+	Timestamp tools.Time `json:"timestamp"`
+	PrevHash  tools.Hash `json:"prev_hash"`
+	Data      tools.Data `json:"data"`
+	Hash      tools.Hash `json:"hash"`
 }
 
 func (b *Block) MarshalJSON() ([]byte, error) {
+	type alias Block
 	if err := b.Validate(); err != nil {
-		return []byte{}, err
+		return nil, err
 	}
-	return json.Marshal(b.toblock())
+	return json.Marshal((*alias)(b))
 }
 
-func (b *Block) UnmarshalJSON(data []byte) error {
-	B := block{}
-	if err := json.Unmarshal(data, &B); err != nil {
+func (b *Block) UnmarshalJSON(save []byte) error {
+	type alias Block
+	aux := alias{}
+	if err := json.Unmarshal(save, &aux); err != nil {
 		return err
 	}
-	*b = B.toBlock()
+	*b = Block(aux)
 	if err := b.Validate(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *Block) Hash() Hash {
-	return b.hash
-}
-
-func (b *Block) PrevHash() Hash {
-	return b.prevHash
-}
-
-func (b *Block) Data() Data {
-	return b.data
-}
-
-func (b *Block) genHash() Hash {
-	return HashB([]byte{byte(b.timestamp)}, b.prevHash[:], []byte(b.data.String()))
-}
-
-func (b *Block) Validate() error {
-	if b.genHash() != b.hash {
-		return errors.New("hash mismatch")
+func (b *Block) genHash() (tools.Hash, error) {
+	dat, err := b.Data.MarshalJSON()
+	if err != nil {
+		return tools.HashB(), err
 	}
-	if err := b.data.Validate(); err != nil {
+	return tools.HashB([]byte{byte(b.Timestamp)}, b.PrevHash[:], dat), nil
+}
+func (b *Block) Validate() error {
+	var errs []error
+	if hash, err := b.genHash(); err != nil {
 		return err
+	} else if b.Hash != hash {
+		errs = append(errs, fmt.Errorf("blockHashMismatch: hash does not match"))
 	}
 	if err := b.Header.Validate(); err != nil {
-		return err
+		errs = append(errs, fmt.Errorf("___\nblockHeaderValidation: %w\n___", err))
 	}
-	return nil
+	if _, ok := b.Header["head"]; !ok {
+		errs = append(errs, fmt.Errorf("noHead: block header has no head"))
+	}
+	return tools.MultiError(errs, "")
 }
 
-func (b *Block) Print() {
-	fmt.Printf("Header: %s; Timestamp: %s; PrevHash: %s...; Hash: %s...;\nData: %s\n",
-		b.Header, b.timestamp.String(), b.prevHash.Hex()[:16], b.hash.Hex()[:16], b.data)
+func (b *Block) String() string {
+	return fmt.Sprintf("Header: %s; Timestamp: %s; PrevHash: %s...; Hash: %s...; Data: %s",
+		b.Header.String(), b.Timestamp.String(), b.PrevHash.Hex()[:8], b.Hash.Hex()[:8], b.Data.String())
 }
 
-func (b *Block) Save() ([]byte, error) {
-	return json.Marshal(b)
-}
-
-func New(header Data, timestamp Time, prevHash Hash, data Data) Block {
-	b := Block{header, timestamp, prevHash, HashB(), data}
-	b.hash = b.genHash()
+func New(header tools.Data, timestamp tools.Time, prevHash tools.Hash, data tools.Data) Block {
+	b := Block{header, timestamp, prevHash, data, tools.HashB()}
+	if hash, err := b.genHash(); err != nil {
+		panic(err)
+	} else {
+		b.Hash = hash
+	}
+	if err := b.Validate(); err != nil {
+		panic(err)
+	}
 	return b
 }
 
-func Load(save []byte) (Block, error) {
-	b := Block{}
-	if err := json.Unmarshal(save, &b); err != nil {
-		return Block{}, err
-	}
-	return b, nil
+func MNew(header tools.Data, prevHash tools.Hash, data tools.Data) Block {
+	return New(header, tools.CurrTime(), prevHash, data)
 }
 
-func MBlock(header Data, prevHash Hash, data Data) Block {
-	return New(header, CurrTime(), prevHash, data)
+func MBlock(head string, prevHash tools.Hash, data tools.Data) Block {
+	return New(tools.Data{"head": head}, tools.CurrTime(), prevHash, data)
 }
 
-func Genesis(data Data) Block {
-	return MBlock(Data{"head": "Genesis"}, HashB(), data)
+func MGenesis(data tools.Data) Block {
+	return MBlock("Genesis", tools.HashB(), data)
 }
