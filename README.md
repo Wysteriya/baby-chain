@@ -1,3 +1,3 @@
 # baby-chain
 
-### Simple and Complete Starter and API for blockchain in golang
+### Simple and Complete Starter plus API for blockchain in golang
