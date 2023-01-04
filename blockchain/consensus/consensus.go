@@ -33,5 +33,5 @@ func (ca *CAlgo) Exec(bc *blockchain.Blockchain, b block.Block) error {
 }
 
 func New(cons ...Consensus) CAlgo {
-	return append(CAlgo{CGenesis}, cons...)
+	return append(CAlgo{CGenesis, CNode}, cons...)
 }

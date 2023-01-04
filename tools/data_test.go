@@ -4,18 +4,34 @@ import (
 	"testing"
 )
 
+func GoodData() Data {
+	return Data{
+		"test1": "test",
+		"test2": Data{"test1": "1"},
+		"test3": Data{"test1": "1", "test2": Data{"test1": "true"}},
+	}
+}
+
+func BadData() Data {
+	return Data{
+		"test1": "test",
+		"test2": Data{"test1": 1},
+		"test3": Data{"test1": 1, "test2": Data{"test1": true}},
+	}
+}
+
 func TestData_Validate(t *testing.T) {
-	var data1 Data
+	var data Data
 
-	data1 = Data{"test1": "test", "test2": Data{"test1": "1"}, "test3": "true"}
-	TError(data1.Validate(), t)
+	data = GoodData()
+	TError(data.Validate(), t)
 
-	data1 = Data{"test1": "test", "test2": Data{"test1": 1}, "test3": true}
-	TExpectedError(data1.Validate(), t)
+	data = BadData()
+	TExpectedError(data.Validate(), t)
 }
 
 func TestJson(t *testing.T) {
-	data1 := Data{"test1": "test", "test2": Data{"test1": "0"}, "test3": "true"}
-	TTestJson(data1, t)
-	t.Log(data1.String())
+	data := GoodData()
+	TTestJson(data, t)
+	t.Log(data.String())
 }

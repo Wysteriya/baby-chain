@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"baby-chain/blockchain/block"
+	"baby-chain/blockchain/wallet"
 	"baby-chain/tools"
 	"encoding/json"
 	"errors"
@@ -38,6 +39,10 @@ func (bc *Blockchain) Len() int {
 	return len(bc.Chain)
 }
 
+func (bc *Blockchain) CurrHash() tools.Hash {
+	return bc.Chain[bc.Len()-1].Hash
+}
+
 func (bc *Blockchain) Validate() error {
 	if err := bc.Chain[0].Validate(); err != nil {
 		return err
@@ -71,7 +76,12 @@ func (bc *Blockchain) AddBlock(b block.Block) error {
 }
 
 func (bc *Blockchain) MineBlock(head string, data tools.Data) block.Block {
-	return block.MBlock(head, bc.Chain[bc.Len()-1].Hash, data)
+	return block.MBlock(head, bc.CurrHash(), data)
+}
+
+func (bc *Blockchain) MineNode(data tools.Data) (block.Block, string, string) {
+	_publicKey, _privateKey, _ := wallet.GenerateKeys()
+	return block.MNode(_publicKey, _privateKey, bc.CurrHash(), data), _publicKey, _privateKey
 }
 
 func (bc *Blockchain) StringChan() chan string {

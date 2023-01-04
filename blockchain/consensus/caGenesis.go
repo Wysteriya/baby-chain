@@ -13,9 +13,6 @@ var CGenesis = Consensus{
 		return true
 	},
 	func(bc *blockchain.Blockchain, b block.Block) error {
-		if err := bc.AddBlock(b); err != nil {
-			return err
-		}
 		return nil
 	},
 }
