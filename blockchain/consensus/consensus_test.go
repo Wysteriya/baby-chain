@@ -7,6 +7,15 @@ import (
 	"testing"
 )
 
+func GoodData() tools.Data {
+	return tools.Data{
+		"test1": "test",
+		"test2": tools.Data{"test1": "1"},
+		"test3": tools.Data{"test1": "1", "test2": tools.Data{"test1": "true"}},
+	}
+}
+
+// todo: improve multi good's, and bad's
 func TCons(con Consensus, bc blockchain.Blockchain, b1, b2 block.Block, t *testing.T) {
 	if !con.Check(&bc, b1) {
 		t.Fatalf("b1 check failed")
@@ -20,17 +29,17 @@ func TCons(con Consensus, bc blockchain.Blockchain, b1, b2 block.Block, t *testi
 }
 
 func TestCaGenesis(t *testing.T) {
-	bc := blockchain.New(tools.Data{}) // todo: use GoodData(...)
+	bc := blockchain.New(GoodData())
 	b1 := bc.Chain[0]
-	b2 := bc.MineBlock("BadGenesis", tools.Data{})
+	b2 := bc.MineBlock("BadGenesis", GoodData())
 	TCons(CGenesis, bc, b1, b2, t)
 }
 
 func TestCaNode(t *testing.T) {
-	bc := blockchain.New(tools.Data{})
-	b1, _publicKey, _privateKey := bc.MineNode(tools.Data{})
+	bc := blockchain.New(GoodData())
+	b1, _publicKey, _privateKey := bc.MineNode(GoodData())
 	t.Logf("publicKey: %s\nprivateKey: %s", _publicKey, _privateKey)
-	b2 := bc.MineBlock("BadNode", tools.Data{})
+	b2 := bc.MineBlock("BadNode", GoodData())
 	TCons(CNode, bc, b1, b2, t)
 }
 
