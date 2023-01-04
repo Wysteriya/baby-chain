@@ -8,13 +8,7 @@ import (
 )
 
 func GoodData() StateData {
-	return StateData{
-		tools.Data{
-			"test1": "test",
-			"test2": tools.Data{"test1": "1"},
-			"test3": tools.Data{"test1": "1", "test2": tools.Data{"test1": "true"}},
-		},
-	}
+	return StateData{tools.GoodTestData()}
 }
 
 // todo: improve multi good's, and bad's
@@ -33,18 +27,18 @@ func TStates(state State, sd StateData, b1, b2 block.Block, t *testing.T) {
 
 func TestSaGenesis(t *testing.T) {
 	sd := GoodData()
-	bc := blockchain.New(GoodData().Data)
+	bc := blockchain.New(tools.GoodTestData())
 	b1 := bc.Chain[0]
-	b2 := bc.MineBlock("BadGenesis", GoodData().Data)
+	b2 := bc.MineBlock("BadGenesis", tools.GoodTestData())
 	TStates(SGenesis, sd, b1, b2, t)
 }
 
 func TestSaNode(t *testing.T) {
 	sd := GoodData()
-	bc := blockchain.New(GoodData().Data)
-	b1, _publicKey, _privateKey := bc.MineNode(GoodData().Data)
+	bc := blockchain.New(tools.GoodTestData())
+	b1, _publicKey, _privateKey := bc.MineNode(tools.GoodTestData())
 	t.Logf("publicKey: %s\nprivateKey: %s", _publicKey, _privateKey)
-	b2 := bc.MineBlock("BadNode", GoodData().Data)
+	b2 := bc.MineBlock("BadNode", tools.GoodTestData())
 	TStates(SNode, sd, b1, b2, t)
 }
 

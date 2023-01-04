@@ -17,19 +17,6 @@ func (d *Data) MarshalJSON() ([]byte, error) {
 	return json.Marshal((*alias)(d))
 }
 
-func (d *Data) Dataify() {
-	for key, val := range *d {
-		if dVal, ok := val.(map[string]interface{}); ok {
-			eVal := Data(dVal)
-			eVal.Dataify()
-			(*d)[key] = eVal
-		} else if dVal, ok := val.(Data); ok {
-			dVal.Dataify()
-			(*d)[key] = dVal
-		}
-	}
-}
-
 func (d *Data) UnmarshalJSON(save []byte) error {
 	type alias Data
 	aux := alias{}
@@ -44,6 +31,19 @@ func (d *Data) UnmarshalJSON(save []byte) error {
 	}
 
 	return nil
+}
+
+func (d *Data) Dataify() {
+	for key, val := range *d {
+		if dVal, ok := val.(map[string]interface{}); ok {
+			eVal := Data(dVal)
+			eVal.Dataify()
+			(*d)[key] = eVal
+		} else if dVal, ok := val.(Data); ok {
+			dVal.Dataify()
+			(*d)[key] = dVal
+		}
+	}
 }
 
 func (d *Data) Validate() error {
@@ -68,4 +68,20 @@ func (d *Data) String() string {
 		panic(err)
 	}
 	return string(s)
+}
+
+func GoodTestData() Data {
+	return Data{
+		"test1": "test",
+		"test2": Data{"test1": "1"},
+		"test3": Data{"test1": "1", "test2": Data{"test1": "true"}},
+	}
+}
+
+func BadTestData() Data {
+	return Data{
+		"test1": "test",
+		"test2": Data{"test1": 1},
+		"test3": Data{"test1": 1, "test2": Data{"test1": true}},
+	}
 }

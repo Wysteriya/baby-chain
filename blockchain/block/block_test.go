@@ -7,41 +7,22 @@ import (
 )
 
 func GoodHeader() tools.Data {
-	return tools.Data{
-		"head":  "Test",
-		"test1": "test",
-		"test2": tools.Data{"test1": "1"},
-		"test3": tools.Data{"test1": "1", "test2": tools.Data{"test1": "true"}},
-	}
-}
-
-func GoodData() tools.Data {
-	return tools.Data{
-		"test1": "test",
-		"test2": tools.Data{"test1": "1"},
-		"test3": tools.Data{"test1": "1", "test2": tools.Data{"test1": "true"}},
-	}
-}
-
-func BadData() tools.Data {
-	return tools.Data{
-		"test1": "test",
-		"test2": tools.Data{"test1": 1},
-		"test3": tools.Data{"test1": 1, "test2": tools.Data{"test1": true}},
-	}
+	d := tools.GoodTestData()
+	d["head"] = "Test"
+	return d
 }
 
 func BadHeader() tools.Data {
-	return BadData()
+	return tools.BadTestData()
 }
 
 func TestM(t *testing.T) {
-	block := MGenesis(GoodData())
+	block := MGenesis(tools.GoodTestData())
 	tools.TError(block.Validate(), t)
 
 	_publicKey, _privateKey, err := wallet.GenerateKeys()
 	tools.TError(err, t)
-	block = MNode(_publicKey, _privateKey, tools.HashB(), GoodData())
+	block = MNode(_publicKey, _privateKey, tools.HashB(), tools.GoodTestData())
 	tools.TError(block.Validate(), t)
 }
 
@@ -50,19 +31,19 @@ func TestBlock_Validate(t *testing.T) {
 		tools.TExpectedPanic(recover(), t)
 	}()
 
-	block := MNew(GoodHeader(), tools.HashB(), GoodData())
+	block := MNew(GoodHeader(), tools.HashB(), tools.GoodTestData())
 	tools.TError(block.Validate(), t)
 
 	block.Hash = tools.HashB()
 	block.Header = BadHeader()
-	block.Data = BadData()
+	block.Data = tools.BadTestData()
 	tools.TExpectedError(block.Validate(), t)
 
-	_ = MNew(BadHeader(), tools.HashB(), BadData())
+	_ = MNew(BadHeader(), tools.HashB(), tools.BadTestData())
 }
 
 func TestJson(t *testing.T) {
-	block := MNew(GoodHeader(), tools.HashB(), GoodData())
+	block := MNew(GoodHeader(), tools.HashB(), tools.GoodTestData())
 	tools.TTestJson(block, t)
 	t.Log(block.String())
 }
