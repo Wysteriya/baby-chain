@@ -1,4 +1,4 @@
-package states
+package state
 
 import (
 	"baby-chain/blockchain/block"
