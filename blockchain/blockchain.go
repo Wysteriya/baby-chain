@@ -10,8 +10,8 @@ import (
 )
 
 type Blockchain struct {
-	Chain []block.Block `json:"chain"`
 	Fork  string        `json:"fork"`
+	Chain []block.Block `json:"chain"`
 }
 
 func (bc *Blockchain) MarshalJSON() ([]byte, error) {
@@ -97,5 +97,5 @@ func (bc *Blockchain) StringChan() chan string {
 }
 
 func New(data tools.Data) Blockchain {
-	return Blockchain{[]block.Block{block.MGenesis(data)}, "AAA1"}
+	return Blockchain{"AAA1", []block.Block{block.MGenesis(data)}}
 }

@@ -6,5 +6,5 @@ import (
 
 func main() {
 	gpp.FetchHyperParams()
-	//gpp.SaveHyperParams()
+	gpp.SaveHyperParams()
 }

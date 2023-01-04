@@ -11,9 +11,9 @@ import (
 )
 
 var bc blockchain.Blockchain
-var bcFName = "blockchain.bin"
+var bcFName = "gpp/blockchain.json"
 var sd state.StateData
-var sdFName = "statedata.bin"
+var sdFName = "gpp/statedata.json"
 var cons consensus.CAlgo
 var states state.SAlgo
 
