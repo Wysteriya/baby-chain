@@ -27,7 +27,7 @@ var CNode = Consensus{
 		return true
 	},
 	func(bc *blockchain.Blockchain, b block.Block) error {
-		ipAddress, _ := b.Data["publicKey"].(string)
+		ipAddress, _ := b.Data["ipAddress"].(string)
 		if net.ParseIP(ipAddress) == nil {
 			return errors.New("invalidIpAddress")
 		}

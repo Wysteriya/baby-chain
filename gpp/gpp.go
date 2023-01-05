@@ -10,12 +10,12 @@ import (
 	"os"
 )
 
-var bc blockchain.Blockchain
+var Bc blockchain.Blockchain
 var bcFName = "gpp/blockchain.json"
-var sd state.StateData
+var Sd state.StateData
 var sdFName = "gpp/statedata.json"
-var cons consensus.CAlgo
-var states state.SAlgo
+var Cons consensus.CAlgo
+var States state.SAlgo
 
 func genesisData() tools.Data {
 	return tools.Data{}
@@ -27,33 +27,33 @@ func stateData() state.StateData {
 
 func FetchHyperParams() {
 	if _, err := os.Open(bcFName); errors.Is(err, os.ErrNotExist) {
-		bc = blockchain.New(genesisData())
+		Bc = blockchain.New(genesisData())
 	} else {
-		if err := json.Unmarshal(tools.ReadData(bcFName), &bc); err != nil {
+		if err := json.Unmarshal(tools.ReadData(bcFName), &Bc); err != nil {
 			panic(err)
 		}
 	}
 	if _, err := os.Open(sdFName); errors.Is(err, os.ErrNotExist) {
-		sd = stateData()
+		Sd = stateData()
 	} else {
-		if err := json.Unmarshal(tools.ReadData(sdFName), &sd); err != nil {
+		if err := json.Unmarshal(tools.ReadData(sdFName), &Sd); err != nil {
 			panic(err)
 		}
 	}
 
-	cons = consensus.New()
-	states = state.New()
+	Cons = consensus.New()
+	States = state.New()
 }
 
 func SaveHyperParams() {
-	save, err := json.Marshal(&bc)
+	save, err := json.Marshal(&Bc)
 	if err != nil {
 		panic(err)
 	}
 	if err := tools.WriteData(bcFName, save); err != nil {
 		panic(err)
 	}
-	save, err = json.Marshal(&sd)
+	save, err = json.Marshal(&Sd)
 	if err := tools.WriteData(sdFName, save); err != nil {
 		panic(err)
 	}
