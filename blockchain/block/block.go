@@ -91,8 +91,8 @@ func MGenesis(data tools.Data) Block {
 }
 
 func MNode(_publicKey string, _privateKey string, prevHash tools.Hash, data tools.Data) Block {
-	data["publicKey"] = _publicKey
-	data["ipAddress"] = tools.GetOutboundIP()
+	data["public_key"] = _publicKey
+	data["ip_address"] = tools.GetOutboundIP()
 	b := MBlock("Node", prevHash, data)
 	sign, _ := wallet.SignHash(_privateKey, b.Hash)
 	b.Header["signature1"] = hex.EncodeToString(sign)

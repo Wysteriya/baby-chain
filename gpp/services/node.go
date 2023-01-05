@@ -32,5 +32,6 @@ func NodePost(ctx *gin.Context) {
 		return
 	}
 
+	Sync(ctx)
 	httpRes.SendJson(sendObj)
 }

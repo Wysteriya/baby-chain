@@ -9,3 +9,7 @@ type ReceiveAnnouncement struct {
 	PublicKey  string `json:"public_key"`
 	PrivateKey string `json:"private_key"`
 }
+
+type SendAnnouncement struct {
+	AnnounceBlockData string
+}

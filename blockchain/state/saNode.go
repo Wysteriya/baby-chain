@@ -14,11 +14,11 @@ var SNode = State{
 	},
 	func(sd *StateData, b block.Block) error {
 		data, ok := sd.Data["Nodes"].(tools.Data)
-		_publicKey, _ := b.Data["publicKey"].(string)
 		if !ok {
 			data = tools.Data{}
 			sd.Data["Nodes"] = data
 		}
+		_publicKey, _ := b.Data["publicKey"].(string)
 		data[_publicKey] = b.Data
 		return nil
 	},

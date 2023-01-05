@@ -3,7 +3,10 @@ package consensus
 import (
 	"baby-chain/blockchain"
 	"baby-chain/blockchain/block"
+	"baby-chain/blockchain/wallet"
+	"encoding/hex"
 	"errors"
+	"fmt"
 )
 
 type Consensus struct {
@@ -34,4 +37,23 @@ func (ca *CAlgo) Exec(bc *blockchain.Blockchain, b block.Block) error {
 
 func New(cons ...Consensus) CAlgo {
 	return append(CAlgo{CGenesis, CNode}, cons...)
+}
+
+func SignCheckBlock(b block.Block) error {
+	_publicKey, ok := b.Data["public_key"].(string)
+	if !ok {
+		return fmt.Errorf("noPublicKeyFound")
+	}
+	_sign, ok := b.Header["signature1"].(string)
+	if !ok {
+		return fmt.Errorf("nosignature1Found")
+	}
+	sign, err := hex.DecodeString(_sign)
+	if err != nil {
+		return err
+	}
+	if !wallet.VerifySignature(_publicKey, b.Hash, sign) {
+		return fmt.Errorf("invalidSignatureHashPair")
+	}
+	return nil
 }
