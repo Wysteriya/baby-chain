@@ -1,12 +1,14 @@
 package services
 
 import (
+	"baby-chain/blockchain"
 	"baby-chain/gpp"
 	"baby-chain/gpp/models"
 	"baby-chain/tools"
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -65,7 +67,24 @@ func Sync(ctx *gin.Context) {
 		}
 		SendAll(httpRes, bytes.NewBuffer(sendObjBytes), "sync")
 	} else {
-		// todo
+		var bc blockchain.Blockchain
+		if err := json.Unmarshal([]byte(receiveObj.BlockchainData), &bc); err != nil {
+			httpRes.Error(err)
+			return
+		}
+		if err := bc.Validate(); err != nil {
+			httpRes.Error(err)
+			return
+		}
+		if bc.Len() < gpp.Bc.Len() {
+			httpRes.Error(fmt.Errorf("outdatedBlockchainReceived"))
+			return
+		}
+		if bc.Chain[gpp.Bc.Len()-1].Hash != gpp.Bc.CurrHash() {
+			httpRes.Error(fmt.Errorf("blockchainCompatibilityError"))
+			return
+		}
+		gpp.Bc = bc
 	}
 
 	httpRes.Text("ok")
