@@ -45,20 +45,20 @@ func SendBid(ctx *gin.Context) {
 	receiveObj := new(models.ReceiveBid)
 	sendObj := new(models.SendBid)
 	httpRes := gpp.NewHttpResponse(ctx)
-	err := httpRes.BindJson(receiveObj)
-	if err != nil {
+	if err := httpRes.BindJson(receiveObj); err != nil {
 		httpRes.Error(err)
 		return
 	}
 
-	openAnnouncements := gpp.Sd.Data[receiveObj.AnnouncementId].(tools.Data)
-	publicKey := openAnnouncements["public_key"].(string)
-	nodes := gpp.Sd.Data["nodes"].(tools.Data)
-	ipAddress := nodes[publicKey].(string)
+	publicKey := gpp.Sd.Data[receiveObj.AnnouncementId].(tools.Data)["public_key"].(string)
+	ipAddress := gpp.Sd.Data["nodes"].(tools.Data)[publicKey].(string)
 	b := gpp.Bc.MineBlock("bids",
-		tools.Data{"announcement_id": receiveObj.AnnouncementId,
-			"bid_amount": receiveObj.BidAmount,
-			"public_key": receiveObj.PublicKey})
+		tools.Data{
+			"announcement_id": receiveObj.AnnouncementId,
+			"bid_amount":      receiveObj.BidAmount,
+			"public_key":      receiveObj.PublicKey,
+		},
+	)
 	if err := gpp.Cons.Exec(&gpp.Bc, b); err != nil {
 		httpRes.Error(err)
 		return
@@ -73,12 +73,12 @@ func SendBid(ctx *gin.Context) {
 		return
 	}
 	b.Header["signature1"] = string(signature)
-	bidBlocData, err := json.Marshal(&b)
+	bidBlockData, err := json.Marshal(&b)
 	if err != nil {
 		httpRes.Error(err)
 		return
 	}
-	sendObj.BidBlockData = string(bidBlocData)
+	sendObj.BidBlockData = string(bidBlockData)
 	sendObjBytes, err := json.Marshal(sendObj)
 	if err != nil {
 		httpRes.Error(err)
@@ -91,5 +91,4 @@ func SendBid(ctx *gin.Context) {
 	}
 
 	httpRes.Text("ok")
-
 }

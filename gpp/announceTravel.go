@@ -1,14 +1,12 @@
 package gpp
 
 import (
-	"baby-chain/blockchain"
 	"baby-chain/blockchain/block"
-	"baby-chain/blockchain/consensus"
 	"baby-chain/blockchain/state"
 	"baby-chain/tools"
 )
 
-func validateAT(_ *blockchain.Blockchain, b block.Block) bool {
+func validateAT(_ *state.StateData, b block.Block) bool {
 	if b.Header["head"] != "AnnounceTravel" {
 		return false
 	}
@@ -36,24 +34,15 @@ func validateAT(_ *blockchain.Blockchain, b block.Block) bool {
 	return true
 }
 
-func runAT(_ *blockchain.Blockchain, _ block.Block) error {
-	return nil
-}
-
-var CAnnounceTravel = consensus.Consensus{Check: validateAT, Run: runAT}
-
-func validateATS(_ *state.StateData, b block.Block) bool {
-	return validateAT(nil, b)
-}
-
-func runATS(sd *state.StateData, b block.Block) error {
+func runAT(sd *state.StateData, b block.Block) error {
 	data, ok := sd.Data["OpenAnnouncements"].(tools.Data)
 	if !ok {
 		data = tools.Data{}
 		sd.Data["OpenAnnouncements"] = data
 	}
 	data[b.Hash.Hex()].(tools.Data)["data"] = b.Data
+	data[b.Hash.Hex()].(tools.Data)["timestamp"] = b.Timestamp.String()
 	return nil
 }
 
-var SAnnounceTravel = state.State{Check: validateATS, Run: runATS}
+var SAnnounceTravel = state.State{Check: validateAT, Run: runAT}

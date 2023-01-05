@@ -50,8 +50,7 @@ func AnnounceTravel(ctx *gin.Context) {
 		return
 	}
 
-	b := gpp.Bc.MineBlock(
-		"AnnounceTravel",
+	b := gpp.Bc.MineBlock("AnnounceTravel",
 		tools.Data{
 			"public_key": receiveObj.PublicKey,
 			"from_lat":   receiveObj.FromLat,

@@ -11,12 +11,12 @@ func registerClientRoutes(rg *gin.RouterGroup) {
 	clientRoute := rg.Group("/service")
 
 	clientRoute.POST("/node", services.NodePost)
-	//clientRoute.POST("/sync", Sync)
-	//clientRoute.POST("/publicinfo", PublicInfo)
 	clientRoute.POST("/announcetravel", services.AnnounceTravel)
-	//clientRoute.POST("/messaging", MessageService)
-	//clientRoute.GET("/getopenannouncements", GetOpenAnnouncements)
-	//clientRoute.POST("/sendbid", SendBid)
+	clientRoute.POST("/getannouncetravel", services.GetAnnounceTravel)
+	clientRoute.POST("/sendbid", services.SendBid)
+	clientRoute.POST("/getbid", services.GetBid)
+	//clientRoute.POST("/messaging", )
+	//clientRoute.GET("/getopenannouncements", )
 }
 
 func main() {

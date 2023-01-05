@@ -1,14 +1,12 @@
 package gpp
 
 import (
-	"baby-chain/blockchain"
 	"baby-chain/blockchain/block"
-	"baby-chain/blockchain/consensus"
 	"baby-chain/blockchain/state"
 	"baby-chain/tools"
 )
 
-func validateBD(_ *blockchain.Blockchain, b block.Block) bool {
+func validateBD(_ *state.StateData, b block.Block) bool {
 	if b.Header["head"] != "Bid" {
 		return false
 	}
@@ -29,24 +27,16 @@ func validateBD(_ *blockchain.Blockchain, b block.Block) bool {
 	}
 	return true
 }
-func runBD(_ *blockchain.Blockchain, _ block.Block) error {
-	return nil
-}
 
-var Cbid = consensus.Consensus{Check: validateBD, Run: runBD}
-
-func validateBDS(_ *state.StateData, b block.Block) bool {
-	return validateBD(nil, b)
-}
-
-func runBDS(sd *state.StateData, b block.Block) error {
+func runBD(sd *state.StateData, b block.Block) error {
 	data, ok := sd.Data["OpenBids"].(tools.Data)
 	if !ok {
 		data = tools.Data{}
 		sd.Data["OpenBids"] = data
 	}
 	data[b.Hash.Hex()].(tools.Data)["data"] = b.Data
+	data[b.Hash.Hex()].(tools.Data)["timestamp"] = b.Timestamp.String()
 	return nil
 }
 
-var Sbid = state.State{Check: validateBDS, Run: runBDS}
+var SBid = state.State{Check: validateBD, Run: runBD}
