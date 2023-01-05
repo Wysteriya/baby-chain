@@ -5,17 +5,13 @@ import (
 	"baby-chain/gpp"
 	"baby-chain/gpp/models"
 	"baby-chain/tools"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"io"
 )
 
 func NodePost(ctx *gin.Context) {
 	receiveObj := new(models.ReceiveNode)
 	sendObj := new(models.SendNode)
 	httpRes := gpp.NewHttpResponse(ctx)
-	a, _ := io.ReadAll(ctx.Request.Body)
-	fmt.Println(string(a))
 	if err := httpRes.BindJson(&receiveObj); err != nil {
 		httpRes.Error(err)
 		return
