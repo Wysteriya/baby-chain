@@ -13,7 +13,7 @@ func registerClientRoutes(rg *gin.RouterGroup) {
 	clientRoute.POST("/node", services.NodePost)
 	//clientRoute.POST("/sync", Sync)
 	//clientRoute.POST("/publicinfo", PublicInfo)
-	//clientRoute.POST("/announcetravel", AnnounceTravel)
+	clientRoute.POST("/announcetravel", services.AnnounceTravel)
 	//clientRoute.POST("/messaging", MessageService)
 	//clientRoute.GET("/getopenannouncements", GetOpenAnnouncements)
 	//clientRoute.POST("/sendbid", SendBid)

@@ -1,14 +1,1 @@
-{
-  "fork": "AAA1",
-  "chain": [
-    {
-      "header": {
-        "head": "Genesis"
-      },
-      "timestamp": 1672856116,
-      "prev_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "data": {},
-      "hash": "1f01755f83f84443c6825c7268eb99784b9b15e768733adb32ebf88b5d2c7ee8"
-    }
-  ]
-}
+{"fork":"AAA1","chain":[{"header":{"head":"Genesis"},"timestamp":1672856116,"prev_hash":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","data":{},"hash":"1f01755f83f84443c6825c7268eb99784b9b15e768733adb32ebf88b5d2c7ee8"}]}

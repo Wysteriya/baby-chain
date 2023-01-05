@@ -41,8 +41,8 @@ func FetchHyperParams() {
 		}
 	}
 
-	Cons = consensus.New()
-	States = state.New()
+	Cons = consensus.New(CAnnounceTravel)
+	States = state.New(SAts)
 }
 
 func SaveHyperParams() {
