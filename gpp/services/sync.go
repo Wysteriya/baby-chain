@@ -3,7 +3,6 @@ package services
 import (
 	"baby-chain/blockchain"
 	"baby-chain/gpp"
-	"baby-chain/gpp/models"
 	"baby-chain/tools"
 	"bytes"
 	"encoding/json"
@@ -15,7 +14,7 @@ import (
 )
 
 func SendIP(ip string, buffer *bytes.Buffer, service string) error {
-	url := "http://" + ip + ":9090" + "/baby_chain/service/" + service
+	url := "http://" + ip + ":9090" + "/baby_chain/public/" + service
 	resp, err := http.Post(url, "application/json", buffer)
 	if err != nil {
 		return err
@@ -31,61 +30,56 @@ func SendIP(ip string, buffer *bytes.Buffer, service string) error {
 	return nil
 }
 
-func SendAll(httpRes *gpp.HttpResponse, buffer *bytes.Buffer, service string) {
+func SendAll(data []byte, service string) chan error {
 	nodes, _ := gpp.Sd.Data["Nodes"].(tools.Data)
-	for _, ip := range nodes {
-		ip, _ := ip.(string)
-		go func() {
-			if err := SendIP(ip, buffer, service); err != nil {
-				httpRes.Error(err)
+	errChan := make(chan error)
+	go func() {
+		for _, ip := range nodes {
+			ip, _ := ip.(string)
+			if err := SendIP(ip, bytes.NewBuffer(data), service); err != nil {
+				errChan <- err
 			}
-		}()
-	}
+		}
+		close(errChan)
+	}()
+	return errChan
 }
 
-func Sync(ctx *gin.Context) {
-	receiveObj := new(models.ReceiveSync)
+func SyncSend() error {
+	sendObjBytes, err := json.Marshal(gpp.Bc)
+	if err != nil {
+		return err
+	}
+	SendAll(sendObjBytes, "sync")
+	return nil
+}
+
+func SyncPost(ctx *gin.Context) {
+	var bc blockchain.Blockchain
 	httpRes := gpp.NewHttpResponse(ctx)
-	if err := httpRes.BindJson(&receiveObj); err != nil {
+	if err := httpRes.BindJson(&bc); err != nil {
 		httpRes.Error(err)
 		return
 	}
 
-	if receiveObj.Type == "send" {
-		sendObj := new(models.SendSync)
-		data, err := json.Marshal(gpp.Bc)
-		if err != nil {
-			httpRes.Error(err)
-			return
-		}
-		sendObj.BlockchainData = string(data)
-		sendObj.Type = "receive"
-		sendObjBytes, err := json.Marshal(sendObj)
-		if err != nil {
-			httpRes.Error(err)
-			return
-		}
-		SendAll(httpRes, bytes.NewBuffer(sendObjBytes), "sync")
-	} else {
-		var bc blockchain.Blockchain
-		if err := json.Unmarshal([]byte(receiveObj.BlockchainData), &bc); err != nil {
-			httpRes.Error(err)
-			return
-		}
-		if err := bc.Validate(); err != nil {
-			httpRes.Error(err)
-			return
-		}
-		if bc.Len() < gpp.Bc.Len() {
-			httpRes.Error(fmt.Errorf("outdatedBlockchainReceived"))
-			return
-		}
-		if bc.Chain[gpp.Bc.Len()-1].Hash != gpp.Bc.CurrHash() {
-			httpRes.Error(fmt.Errorf("blockchainCompatibilityError"))
-			return
-		}
-		gpp.Bc = bc
+	if err := bc.Validate(); err != nil {
+		httpRes.Error(err)
+		return
 	}
+	if bc.Len() < gpp.Bc.Len() {
+		httpRes.Error(fmt.Errorf("outdatedBlockchainReceived"))
+		return
+	}
+	if bc.Chain[gpp.Bc.Len()-1].Hash != gpp.Bc.CurrHash() {
+		httpRes.Error(fmt.Errorf("blockchainCompatibilityError"))
+		return
+	}
+	gpp.Bc = bc
 
 	httpRes.Text("ok")
+}
+
+func SyncGet(ctx *gin.Context) {
+	httpRes := gpp.NewHttpResponse(ctx)
+	httpRes.SendJson(gpp.Bc)
 }

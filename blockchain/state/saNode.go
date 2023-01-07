@@ -18,7 +18,7 @@ var SNode = State{
 			data = tools.Data{}
 			sd.Data["Nodes"] = data
 		}
-		_publicKey, _ := b.Data["publicKey"].(string)
+		_publicKey, _ := b.Data["public_key"].(string)
 		data[_publicKey] = b.Data
 		return nil
 	},

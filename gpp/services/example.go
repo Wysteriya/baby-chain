@@ -14,6 +14,9 @@ func Example(ctx *gin.Context) {
 		httpRes.Error(err)
 		return
 	}
+
 	// custom code
+
 	httpRes.SendJson(sendObj)
+	httpRes.Text("ok")
 }

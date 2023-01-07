@@ -1,13 +1,9 @@
 package models
 
-type ReceiveNode struct {
-	Driver      string `json:"driver"`
-	LicenceNum  string `json:"licence_num"`
-	VehicleType string `json:"vehicle_type"`
+import "baby-chain/tools"
 
-	BloodGroup string `json:"blood_group"`
-	Age        string `json:"age"`
-	Gender     string `json:"gender"`
+type ReceiveNode struct {
+	tools.Data
 }
 
 type SendNode struct {
