@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -31,12 +32,12 @@ func SendIP(ip string, buffer *bytes.Buffer, service string) error {
 	return nil
 }
 
-func SendAll(httpRes *gpp.HttpResponse, buffer *bytes.Buffer, service string) {
+func SendAll(httpRes *gpp.HttpResponse, sendObjBytes []byte, service string) {
 	nodes, _ := gpp.Sd.Data["Nodes"].(tools.Data)
 	for _, ip := range nodes {
 		ip, _ := ip.(string)
 		go func() {
-			if err := SendIP(ip, buffer, service); err != nil {
+			if err := SendIP(ip, bytes.NewBuffer(sendObjBytes), service); err != nil {
 				httpRes.Error(err)
 			}
 		}()
@@ -55,17 +56,17 @@ func Sync(ctx *gin.Context) {
 		sendObj := new(models.SendSync)
 		data, err := json.Marshal(gpp.Bc)
 		if err != nil {
-			httpRes.Error(err)
+			log.Fatalln(err.Error())
 			return
 		}
 		sendObj.BlockchainData = string(data)
 		sendObj.Type = "receive"
 		sendObjBytes, err := json.Marshal(sendObj)
 		if err != nil {
-			httpRes.Error(err)
+			log.Fatalln(err.Error())
 			return
 		}
-		SendAll(httpRes, bytes.NewBuffer(sendObjBytes), "sync")
+		SendAll(httpRes, sendObjBytes, "sync")
 	} else {
 		var bc blockchain.Blockchain
 		if err := json.Unmarshal([]byte(receiveObj.BlockchainData), &bc); err != nil {
@@ -87,5 +88,5 @@ func Sync(ctx *gin.Context) {
 		gpp.Bc = bc
 	}
 
-	httpRes.Text("ok")
+	log.Println("sync ok")
 }

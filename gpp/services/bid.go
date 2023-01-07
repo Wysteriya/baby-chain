@@ -59,10 +59,6 @@ func SendBid(ctx *gin.Context) {
 			"public_key":      receiveObj.PublicKey,
 		},
 	)
-	if err := gpp.Cons.Exec(&gpp.Bc, b); err != nil {
-		httpRes.Error(err)
-		return
-	}
 	if err := gpp.States.Exec(&gpp.Sd, b); err != nil {
 		httpRes.Error(err)
 		return

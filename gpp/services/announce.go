@@ -7,7 +7,6 @@ import (
 	"baby-chain/gpp"
 	"baby-chain/gpp/models"
 	"baby-chain/tools"
-	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 )
@@ -60,10 +59,6 @@ func AnnounceTravel(ctx *gin.Context) {
 			"time":       receiveObj.Time,
 		},
 	)
-	if err := gpp.Cons.Exec(&gpp.Bc, b); err != nil {
-		httpRes.Error(err)
-		return
-	}
 	if err := gpp.States.Exec(&gpp.Sd, b); err != nil {
 		httpRes.Error(err)
 		return
@@ -85,7 +80,7 @@ func AnnounceTravel(ctx *gin.Context) {
 		httpRes.Error(err)
 		return
 	}
-	SendAll(httpRes, bytes.NewBuffer(sendObjBytes), "getannouncetravel") // todo: sync to drivers only
+	SendAll(httpRes, sendObjBytes, "getannouncetravel") // todo: sync to drivers only
 
 	httpRes.Text("ok")
 }

@@ -10,3 +10,8 @@ type ReceiveBid struct {
 type SendBid struct {
 	BidBlockData string
 }
+
+type AcceptBid struct {
+	BidBlockData string
+	Type         string
+}

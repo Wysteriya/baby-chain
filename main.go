@@ -15,8 +15,8 @@ func registerClientRoutes(rg *gin.RouterGroup) {
 	clientRoute.POST("/getannouncetravel", services.GetAnnounceTravel)
 	clientRoute.POST("/sendbid", services.SendBid)
 	clientRoute.POST("/getbid", services.GetBid)
+	clientRoute.GET("/getopenannouncements", services.GetOpenAnnouncements)
 	//clientRoute.POST("/messaging", )
-	//clientRoute.GET("/getopenannouncements", )
 }
 
 func main() {

@@ -5,7 +5,10 @@ import (
 	"baby-chain/gpp"
 	"baby-chain/gpp/models"
 	"baby-chain/tools"
+	"bytes"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func NodePost(ctx *gin.Context) {
@@ -32,6 +35,19 @@ func NodePost(ctx *gin.Context) {
 		return
 	}
 
-	Sync(ctx)
+	syncSendObj := new(models.SendSync)
+	syncSendObj.Type = "send"
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(syncSendObj); err != nil {
+		httpRes.Error(err)
+		return
+	}
+	var err error
+	ctx.Request, err = http.NewRequest(http.MethodPost, "localhost:9090/baby_chain/service/sync", &buf)
+	if err != nil {
+		httpRes.Error(err)
+		return
+	}
 	httpRes.SendJson(sendObj)
+	Sync(ctx)
 }
