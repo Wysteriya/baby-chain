@@ -51,6 +51,16 @@ func (cs *CSAlgo) GenSD(bc *blockchain.Blockchain) (StateData, error) {
 	return sd, nil
 }
 
+func (cs *CSAlgo) SetSD(bc *blockchain.Blockchain, sd StateData, start, stop int) (StateData, error) {
+	newBc := blockchain.New(bc.Chain[0].Data)
+	for _, b := range bc.Chain[start:stop] {
+		if err := cs.Exec(&newBc, &sd, b); err != nil {
+			return sd, err
+		}
+	}
+	return sd, nil
+}
+
 func NewSD() StateData {
 	return StateData{Data{}}
 }

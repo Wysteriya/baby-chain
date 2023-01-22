@@ -2,8 +2,7 @@ package gpp
 
 import (
 	"baby-chain/blockchain"
-	"baby-chain/blockchain/consensus"
-	"baby-chain/blockchain/state"
+	cons "baby-chain/blockchain/consensus_state"
 	"baby-chain/tools"
 	"baby-chain/tools/data"
 	"encoding/json"
@@ -11,50 +10,54 @@ import (
 	"os"
 )
 
-var Bc blockchain.Blockchain
-var bcFName = "gpp/blockchain.json"
-var Sd state.StateData
-var sdFName = "gpp/statedata.json"
-var Cons consensus.CAlgo
-var States state.SAlgo
+const (
+	bcFName = "gpp/blockchain.json"
+	sdFName = "gpp/statedata.json"
+)
+
+var (
+	BC     blockchain.Blockchain
+	SD     cons.StateData
+	CSAlgo cons.CSAlgo
+)
 
 func genesisData() data.Data {
 	return data.Data{}
 }
 
-func stateData() state.StateData {
-	return state.StateData{Data: data.Data{}}
-}
-
-func FetchHyperParams() {
+func FetchHyperParams() (blockchain.Blockchain, cons.StateData, cons.CSAlgo) {
+	var bc blockchain.Blockchain
+	var sd cons.StateData
+	var csAlgo = cons.New()
 	if _, err := os.Open(bcFName); errors.Is(err, os.ErrNotExist) {
-		Bc = blockchain.New(genesisData())
+		bc = blockchain.New(genesisData())
 	} else {
-		if err := json.Unmarshal(tools.ReadData(bcFName), &Bc); err != nil {
+		if err := json.Unmarshal(tools.ReadData(bcFName), &bc); err != nil {
 			panic(err)
 		}
 	}
 	if _, err := os.Open(sdFName); errors.Is(err, os.ErrNotExist) {
-		Sd = stateData()
+		sd, err = csAlgo.GenSD(&bc)
+		if err != nil {
+			panic(err)
+		}
 	} else {
-		if err := json.Unmarshal(tools.ReadData(sdFName), &Sd); err != nil {
+		if err := json.Unmarshal(tools.ReadData(sdFName), &sd); err != nil {
 			panic(err)
 		}
 	}
-
-	Cons = consensus.New()
-	States = state.New()
+	return bc, sd, csAlgo
 }
 
 func SaveHyperParams() {
-	save, err := json.Marshal(&Bc)
+	save, err := json.Marshal(&BC)
 	if err != nil {
 		panic(err)
 	}
 	if err := tools.WriteData(bcFName, save); err != nil {
 		panic(err)
 	}
-	save, err = json.Marshal(&Sd)
+	save, err = json.Marshal(&SD)
 	if err := tools.WriteData(sdFName, save); err != nil {
 		panic(err)
 	}

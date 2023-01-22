@@ -15,7 +15,7 @@ func NewHttpResponse(ctx *gin.Context) *HttpResponse {
 
 func (res *HttpResponse) Error(err error) {
 	if err != nil {
-		res.ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		res.ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 }
 

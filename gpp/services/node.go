@@ -18,12 +18,8 @@ func NodePost(ctx *gin.Context) {
 	}
 
 	var b block.Block
-	b, sendObj.PublicKey, sendObj.PrivateKey = gpp.Bc.MineNode(receiveObj.Data)
-	if err := gpp.Cons.Exec(&gpp.Bc, b); err != nil {
-		httpRes.Error(err)
-		return
-	}
-	if err := gpp.States.Exec(&gpp.Sd, b); err != nil {
+	b, sendObj.PublicKey, sendObj.PrivateKey = gpp.BC.MineNode(receiveObj.Data)
+	if err := gpp.CSAlgo.Exec(&gpp.BC, &gpp.SD, b); err != nil {
 		httpRes.Error(err)
 		return
 	}

@@ -19,7 +19,7 @@ func privateRoutes(rg *gin.RouterGroup) {
 }
 
 func main() {
-	gpp.FetchHyperParams()
+	gpp.BC, gpp.SD, gpp.CSAlgo = gpp.FetchHyperParams()
 	chainName := "baby_chain"
 	go func() {
 		server := gin.Default()
