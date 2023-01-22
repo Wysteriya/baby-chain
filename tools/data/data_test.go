@@ -1,6 +1,7 @@
-package tools
+package data
 
 import (
+	"baby-chain/tools"
 	"testing"
 )
 
@@ -8,14 +9,14 @@ func TestData_Validate(t *testing.T) {
 	var data Data
 
 	data = GoodTestData()
-	TError(data.Validate(), t)
+	tools.TError(data.Validate(), t)
 
 	data = BadTestData()
-	TExpectedError(data.Validate(), t)
+	tools.TExpectedError(data.Validate(), t)
 }
 
 func TestJson(t *testing.T) {
 	data := GoodTestData()
-	TTestJson(data, t)
+	tools.TTestJson(data, t)
 	t.Log(data.String())
 }

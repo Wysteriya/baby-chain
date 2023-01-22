@@ -3,6 +3,7 @@ package block
 import (
 	"baby-chain/blockchain/wallet"
 	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"encoding/hex"
 	"fmt"
 )
@@ -20,23 +21,23 @@ func Signature(i int) string {
 	return fmt.Sprintf("signature_%d", i)
 }
 
-func MNew(header tools.Data, prevHash tools.Hash, data tools.Data) Block {
+func MNew(header Data, prevHash tools.Hash, data Data) Block {
 	return New(header, tools.CurrTime(), prevHash, data)
 }
 
-func MBlock(head string, prevHash tools.Hash, data tools.Data) Block {
-	return MNew(tools.Data{Head: head}, prevHash, data)
+func MBlock(head string, prevHash tools.Hash, data Data) Block {
+	return MNew(Data{Head: head}, prevHash, data)
 }
 
-func MTest(prevHash tools.Hash, data tools.Data) Block {
+func MTest(prevHash tools.Hash, data Data) Block {
 	return MBlock(TEST, prevHash, data)
 }
 
-func MGenesis(data tools.Data) Block {
+func MGenesis(data Data) Block {
 	return MBlock(GENESIS, tools.HashB(), data)
 }
 
-func MNode(_publicKey string, _privateKey string, prevHash tools.Hash, data tools.Data) Block {
+func MNode(_publicKey string, _privateKey string, prevHash tools.Hash, data Data) Block {
 	data[PublicKey] = _publicKey
 	data[IpAddress] = tools.GetOutboundIP()
 	b := MBlock(NODE, prevHash, data)

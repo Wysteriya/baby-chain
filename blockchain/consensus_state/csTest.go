@@ -3,6 +3,7 @@ package consensus_state
 import (
 	"baby-chain/blockchain"
 	"baby-chain/blockchain/block"
+	. "baby-chain/tools/data"
 	"fmt"
 )
 
@@ -29,12 +30,12 @@ var CSTest = ConsensusState{
 		if err := bc.AddBlock(b); err != nil {
 			return err
 		}
-		tests, ok := sd.Data[TESTS].(StateData)
+		tests, ok := sd.Data[TESTS].(Data)
 		if !ok {
-			tests = NewSD()
+			tests = Data{}
 			sd.Data[TESTS] = tests
 		}
-		tests.Data[b.Data[TestNum].(string)] = b.Data
+		tests[b.Data[TestNum].(string)] = b.Data
 		return nil
 	},
 }

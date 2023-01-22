@@ -5,6 +5,7 @@ import (
 	"baby-chain/blockchain/consensus"
 	"baby-chain/blockchain/state"
 	"baby-chain/tools"
+	"baby-chain/tools/data"
 	"encoding/json"
 	"errors"
 	"os"
@@ -17,12 +18,12 @@ var sdFName = "gpp/statedata.json"
 var Cons consensus.CAlgo
 var States state.SAlgo
 
-func genesisData() tools.Data {
-	return tools.Data{}
+func genesisData() data.Data {
+	return data.Data{}
 }
 
 func stateData() state.StateData {
-	return state.StateData{Data: tools.Data{}}
+	return state.StateData{Data: data.Data{}}
 }
 
 func FetchHyperParams() {

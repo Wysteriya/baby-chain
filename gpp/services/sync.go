@@ -3,7 +3,6 @@ package services
 import (
 	"baby-chain/blockchain"
 	"baby-chain/gpp"
-	"baby-chain/tools"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -31,7 +30,7 @@ func SendIP(ip string, buffer *bytes.Buffer, service string) error {
 }
 
 func SendAll(data []byte, service string) chan error {
-	nodes, _ := gpp.Sd.Data["Nodes"].(tools.Data)
+	nodes, _ := gpp.Sd.Data["Nodes"].(data.Data)
 	errChan := make(chan error)
 	go func() {
 		for _, ip := range nodes {

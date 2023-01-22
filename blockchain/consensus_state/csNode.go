@@ -4,7 +4,7 @@ import (
 	"baby-chain/blockchain"
 	"baby-chain/blockchain/block"
 	"baby-chain/errors"
-	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"net"
 )
 
@@ -41,15 +41,15 @@ var CSNode = ConsensusState{
 			return err
 		}
 
-		nodes, ok := sd.Data[NODES].(tools.Data)
+		nodes, ok := sd.Data[NODES].(Data)
 		if !ok {
-			nodes = tools.Data{}
+			nodes = Data{}
 			sd.Data[NODES] = nodes
 		}
 		_publicKey := b.Data[block.PublicKey].(string)
-		node, ok := nodes[_publicKey].(tools.Data)
+		node, ok := nodes[_publicKey].(Data)
 		if !ok {
-			node = tools.Data{Balance: "0"}
+			node = Data{Balance: "0"}
 			nodes[_publicKey] = node
 		}
 		node[block.IpAddress] = b.Data[block.IpAddress]

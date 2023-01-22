@@ -1,9 +1,11 @@
 package models
 
-import "baby-chain/tools"
+import (
+	"baby-chain/tools/data"
+)
 
 type ReceiveNode struct {
-	tools.Data
+	data.Data
 }
 
 type SendNode struct {

@@ -3,15 +3,16 @@ package block
 import (
 	"baby-chain/errors"
 	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"encoding/json"
 	"fmt"
 )
 
 type Block struct {
-	Header    tools.Data `json:"header"`
+	Header    Data       `json:"header"`
 	Timestamp tools.Time `json:"timestamp"`
 	PrevHash  tools.Hash `json:"prev_hash"`
-	Data      tools.Data `json:"data"`
+	Data      Data       `json:"data"`
 	Hash      tools.Hash `json:"hash"`
 }
 
@@ -49,7 +50,7 @@ func (b *Block) Validate() error {
 	if hash, err := b.genHash(); err != nil {
 		return err
 	} else if b.Hash != hash {
-		errs = append(errs, errors.HashMismatch(fmt.Sprintf("block.Hash & block.genHash(): %x & %x", b.Hash, hash)))
+		errs = append(errs, errors.HashMismatch(fmt.Sprintf("blockHash & blockGenHash: %x & %x", b.Hash, hash)))
 	}
 	if err := b.Header.Validate(); err != nil {
 		errs = append(errs, fmt.Errorf("=== headerValidationErrors: %w\n===", err))
@@ -65,7 +66,7 @@ func (b *Block) String() string {
 		b.Header.String(), b.Timestamp.String(), b.PrevHash.Hex()[:8], b.Hash.Hex()[:8], b.Data.String())
 }
 
-func New(header tools.Data, timestamp tools.Time, prevHash tools.Hash, data tools.Data) Block {
+func New(header Data, timestamp tools.Time, prevHash tools.Hash, data Data) Block {
 	b := Block{header, timestamp, prevHash, data, tools.HashB()}
 	if hash, err := b.genHash(); err != nil {
 		panic(err)

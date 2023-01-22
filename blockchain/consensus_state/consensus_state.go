@@ -5,13 +5,13 @@ import (
 	"baby-chain/blockchain/block"
 	"baby-chain/blockchain/wallet"
 	"baby-chain/errors"
-	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"encoding/hex"
 )
 
 // StateData : query keys will be upper-cased, value keys will be lower-cased, values can be any unicode
 type StateData struct {
-	tools.Data
+	Data
 }
 
 type ConsensusState struct {
@@ -40,23 +40,23 @@ func (cs *CSAlgo) Exec(bc *blockchain.Blockchain, sd *StateData, b block.Block) 
 	return nil
 }
 
-func (cs *CSAlgo) Validate(bc *blockchain.Blockchain) error {
-	sd := NewSD()
+func (cs *CSAlgo) GenSD(bc *blockchain.Blockchain) (StateData, error) {
 	newBc := blockchain.New(bc.Chain[0].Data)
-	for _, b := range bc.Chain[1:] {
+	sd := NewSD()
+	for _, b := range bc.Chain {
 		if err := cs.Exec(&newBc, &sd, b); err != nil {
-			return err
+			return StateData{}, err
 		}
 	}
-	return nil
-}
-
-func New(cons ...ConsensusState) (CSAlgo, StateData) {
-	return append(CSAlgo{CSGenesis, CSNode}, cons...), NewSD()
+	return sd, nil
 }
 
 func NewSD() StateData {
-	return StateData{tools.Data{}}
+	return StateData{Data{}}
+}
+
+func New(cons ...ConsensusState) CSAlgo {
+	return append(CSAlgo{CSNode}, cons...)
 }
 
 func SignCheckBlock(b block.Block, signLabel string) error {
@@ -79,5 +79,5 @@ func SignCheckBlock(b block.Block, signLabel string) error {
 }
 
 func GoodStateData() StateData {
-	return StateData{tools.GoodTestData()}
+	return StateData{GoodTestData()}
 }

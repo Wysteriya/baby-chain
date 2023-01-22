@@ -4,6 +4,7 @@ import (
 	"baby-chain/blockchain"
 	"baby-chain/blockchain/block"
 	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"testing"
 )
 
@@ -21,16 +22,29 @@ func TCons(con ConsensusState, bc blockchain.Blockchain, sd StateData, b1, b2 bl
 }
 
 func TestCaNode(t *testing.T) {
-	bc := blockchain.New(tools.GoodTestData())
+	bc := blockchain.New(GoodTestData())
 	sd := GoodStateData()
-	b1, _publicKey, _privateKey := bc.MineNode(tools.GoodTestData())
+	b1, _publicKey, _privateKey := bc.MineNode(GoodTestData())
 	t.Logf("publicKey: %s\nprivateKey: %s", _publicKey, _privateKey)
-	b2 := bc.MineBlock("BadNode", tools.GoodTestData())
+	b2 := bc.MineBlock("BadNode", GoodTestData())
 	TCons(CSNode, bc, sd, b1, b2, t)
 }
 
 func TestCSAlgo_Exec(t *testing.T) {
-	//cons, sd := New(CSTest) todo
+	csAlgo := New(CSTest)
+	bc := blockchain.New(GoodTestData())
+	sd, err := csAlgo.GenSD(&bc)
+	tools.TError(err, t)
+
+	b, _, _ := bc.MineNode(GoodTestData())
+	err = csAlgo.Exec(&bc, &sd, b)
+	tools.TError(err, t)
+
+	// todo CSTest
+}
+
+func TestCSAlgo_GenSD(t *testing.T) {
+	// todo
 }
 
 func TestJson(t *testing.T) {
