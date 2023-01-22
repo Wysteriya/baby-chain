@@ -1,9 +1,8 @@
 package block
 
 import (
-	"baby-chain/blockchain/wallet"
+	"baby-chain/errors"
 	"baby-chain/tools"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 )
@@ -44,20 +43,21 @@ func (b *Block) genHash() (tools.Hash, error) {
 	}
 	return tools.HashB([]byte{byte(b.Timestamp)}, b.PrevHash[:], dat), nil
 }
+
 func (b *Block) Validate() error {
 	var errs []error
 	if hash, err := b.genHash(); err != nil {
 		return err
 	} else if b.Hash != hash {
-		errs = append(errs, fmt.Errorf("blockHashMismatch: hash does not match"))
+		errs = append(errs, errors.HashMismatch(fmt.Sprintf("block.Hash & block.genHash(): %x & %x", b.Hash, hash)))
 	}
 	if err := b.Header.Validate(); err != nil {
-		errs = append(errs, fmt.Errorf("___\nblockHeaderValidation: %w\n___", err))
+		errs = append(errs, fmt.Errorf("=== headerValidationErrors: %w\n===", err))
 	}
-	if _, ok := b.Header["head"]; !ok {
-		errs = append(errs, fmt.Errorf("noHead: block header has no head"))
+	if _, ok := b.Header[Head]; !ok {
+		errs = append(errs, errors.NoHead)
 	}
-	return tools.MultiError(errs, "")
+	return errors.MultiError(errs, "blockValidationErrors")
 }
 
 func (b *Block) String() string {
@@ -75,26 +75,5 @@ func New(header tools.Data, timestamp tools.Time, prevHash tools.Hash, data tool
 	if err := b.Validate(); err != nil {
 		panic(err)
 	}
-	return b
-}
-
-func MNew(header tools.Data, prevHash tools.Hash, data tools.Data) Block {
-	return New(header, tools.CurrTime(), prevHash, data)
-}
-
-func MBlock(head string, prevHash tools.Hash, data tools.Data) Block {
-	return MNew(tools.Data{"head": head}, prevHash, data)
-}
-
-func MGenesis(data tools.Data) Block {
-	return MBlock("Genesis", tools.HashB(), data)
-}
-
-func MNode(_publicKey string, _privateKey string, prevHash tools.Hash, data tools.Data) Block {
-	data["public_key"] = _publicKey
-	data["ip_address"] = tools.GetOutboundIP()
-	b := MBlock("Node", prevHash, data)
-	sign, _ := wallet.SignHash(_privateKey, b.Hash)
-	b.Header["signature1"] = hex.EncodeToString(sign)
 	return b
 }

@@ -1,11 +1,11 @@
 package tools
 
 import (
+	"baby-chain/errors"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 )
 
 type Hash [32]byte
@@ -25,7 +25,7 @@ func (h *Hash) UnmarshalJSON(save []byte) error {
 		return err
 	}
 	if len(h_) != 32 {
-		return fmt.Errorf("invalidSave")
+		return errors.InvalidSave("hash is 32 bytes")
 	}
 	copy(h[:], h_)
 	return nil

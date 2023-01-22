@@ -16,7 +16,7 @@ func BadHeader() tools.Data {
 	return tools.BadTestData()
 }
 
-func TestM(t *testing.T) {
+func TestMBlocks(t *testing.T) {
 	block := MGenesis(tools.GoodTestData())
 	tools.TError(block.Validate(), t)
 
@@ -36,6 +36,7 @@ func TestBlock_Validate(t *testing.T) {
 
 	block.Hash = tools.HashB()
 	block.Header = BadHeader()
+	tools.TExpectedError(block.Validate(), t)
 	block.Data = tools.BadTestData()
 	tools.TExpectedError(block.Validate(), t)
 

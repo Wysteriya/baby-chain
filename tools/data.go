@@ -1,12 +1,14 @@
 package tools
 
 import (
+	errors2 "baby-chain/errors"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
 )
 
+// Data : all keys will be lower-cased, values can be any unicode
 type Data map[string]interface{}
 
 func (d *Data) MarshalJSON() ([]byte, error) {
@@ -59,7 +61,7 @@ func (d *Data) Validate() error {
 			errs = append(errs, fmt.Errorf("%s : %s", key, reflect.TypeOf(dVal)))
 		}
 	}
-	return MultiError(errs, "panicDataType")
+	return errors2.MultiError(errs, "panicDataType")
 }
 
 func (d *Data) String() string {

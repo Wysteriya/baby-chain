@@ -3,9 +3,9 @@ package blockchain
 import (
 	"baby-chain/blockchain/block"
 	"baby-chain/blockchain/wallet"
+	"baby-chain/errors"
 	"baby-chain/tools"
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
@@ -60,9 +60,7 @@ func (bc *Blockchain) ValidateBlock(i int, b block.Block) error {
 		return err
 	}
 	if bc.Chain[i].Hash != b.PrevHash {
-		return errors.New(
-			fmt.Sprintf("chainHashMismatch@%d: %v & %v", i, bc.Chain[i].Hash.Hex(), b.PrevHash.Hex()),
-		)
+		return errors.HashMismatch(fmt.Sprintf("chain hash @%d: %x & %x", i, bc.Chain[i].Hash, b.PrevHash))
 	}
 	return nil
 }
