@@ -3,45 +3,27 @@ package block
 import (
 	"baby-chain/blockchain/wallet"
 	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"testing"
 )
 
-func GoodHeader() tools.Data {
-	return tools.Data{
-		"head":  "Test",
-		"test1": "test",
-		"test2": tools.Data{"test1": "1"},
-		"test3": tools.Data{"test1": "1", "test2": tools.Data{"test1": "true"}},
-	}
+func GoodHeader() Data {
+	d := GoodTestData()
+	d[Head] = TEST
+	return d
 }
 
-func GoodData() tools.Data {
-	return tools.Data{
-		"test1": "test",
-		"test2": tools.Data{"test1": "1"},
-		"test3": tools.Data{"test1": "1", "test2": tools.Data{"test1": "true"}},
-	}
+func BadHeader() Data {
+	return BadTestData()
 }
 
-func BadData() tools.Data {
-	return tools.Data{
-		"test1": "test",
-		"test2": tools.Data{"test1": 1},
-		"test3": tools.Data{"test1": 1, "test2": tools.Data{"test1": true}},
-	}
-}
-
-func BadHeader() tools.Data {
-	return BadData()
-}
-
-func TestM(t *testing.T) {
-	block := MGenesis(GoodData())
+func TestMBlocks(t *testing.T) {
+	block := MGenesis(GoodTestData())
 	tools.TError(block.Validate(), t)
 
 	_publicKey, _privateKey, err := wallet.GenerateKeys()
 	tools.TError(err, t)
-	block = MNode(_publicKey, _privateKey, tools.HashB(), GoodData())
+	block = MNode(_publicKey, _privateKey, tools.HashB(), GoodTestData())
 	tools.TError(block.Validate(), t)
 }
 
@@ -50,19 +32,20 @@ func TestBlock_Validate(t *testing.T) {
 		tools.TExpectedPanic(recover(), t)
 	}()
 
-	block := MNew(GoodHeader(), tools.HashB(), GoodData())
+	block := MNew(GoodHeader(), tools.HashB(), GoodTestData())
 	tools.TError(block.Validate(), t)
 
 	block.Hash = tools.HashB()
 	block.Header = BadHeader()
-	block.Data = BadData()
+	tools.TExpectedError(block.Validate(), t)
+	block.Data = BadTestData()
 	tools.TExpectedError(block.Validate(), t)
 
-	_ = MNew(BadHeader(), tools.HashB(), BadData())
+	_ = MNew(BadHeader(), tools.HashB(), BadTestData())
 }
 
 func TestJson(t *testing.T) {
-	block := MNew(GoodHeader(), tools.HashB(), GoodData())
+	block := MNew(GoodHeader(), tools.HashB(), GoodTestData())
 	tools.TTestJson(block, t)
 	t.Log(block.String())
 }

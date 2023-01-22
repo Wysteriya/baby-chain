@@ -3,15 +3,16 @@ package blockchain
 import (
 	"baby-chain/blockchain/block"
 	"baby-chain/blockchain/wallet"
+	"baby-chain/errors"
 	"baby-chain/tools"
+	. "baby-chain/tools/data"
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
 type Blockchain struct {
-	Chain []block.Block `json:"chain"`
 	Fork  string        `json:"fork"`
+	Chain []block.Block `json:"chain"`
 }
 
 func (bc *Blockchain) MarshalJSON() ([]byte, error) {
@@ -60,9 +61,7 @@ func (bc *Blockchain) ValidateBlock(i int, b block.Block) error {
 		return err
 	}
 	if bc.Chain[i].Hash != b.PrevHash {
-		return errors.New(
-			fmt.Sprintf("chainHashMismatch@%d: %v & %v", i, bc.Chain[i].Hash.Hex(), b.PrevHash.Hex()),
-		)
+		return errors.HashMismatch(fmt.Sprintf("chainHash & blockPrevHash @%d: %x & %x", i, bc.Chain[i].Hash, b.PrevHash))
 	}
 	return nil
 }
@@ -75,11 +74,11 @@ func (bc *Blockchain) AddBlock(b block.Block) error {
 	return nil
 }
 
-func (bc *Blockchain) MineBlock(head string, data tools.Data) block.Block {
+func (bc *Blockchain) MineBlock(head string, data Data) block.Block {
 	return block.MBlock(head, bc.CurrHash(), data)
 }
 
-func (bc *Blockchain) MineNode(data tools.Data) (block.Block, string, string) {
+func (bc *Blockchain) MineNode(data Data) (block.Block, string, string) {
 	_publicKey, _privateKey, _ := wallet.GenerateKeys()
 	return block.MNode(_publicKey, _privateKey, bc.CurrHash(), data), _publicKey, _privateKey
 }
@@ -96,6 +95,6 @@ func (bc *Blockchain) StringChan() chan string {
 	return printer
 }
 
-func New(data tools.Data) Blockchain {
-	return Blockchain{[]block.Block{block.MGenesis(data)}, "AAA1"}
+func New(data Data) Blockchain {
+	return Blockchain{"AAA1", []block.Block{block.MGenesis(data)}}
 }
